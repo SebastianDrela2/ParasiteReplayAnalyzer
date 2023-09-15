@@ -1,0 +1,61 @@
+﻿<Window x:Class="ParasiteReplayAnalyzer.UI.ParasiteMainUiWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ParasiteReplayAnalyzer"
+        mc:Ignorable="d"
+        Title="Analyzer" Height="850" Width="1200">
+    <StackPanel>
+        <Grid>
+            <Menu>
+                <MenuItem Header="Actions" Width="50">
+                    <MenuItem x:Name ="_winRate" Header ="Human And Alien WinRate" Click="OnWinRateClicked"/>
+                    <MenuItem x:Name="_bestHosts" Header="Best Hosts" Click="OnBestHostsClicked"/>
+                    <MenuItem x:Name="_bestHumans" Header="Best Humans" Click="OnBestHumansClicked"/>
+                    <MenuItem x:Name="_bestKillers" Header="Best K/D" Click="OnBestKillRatioClicked"/>
+                    <MenuItem x:Name="_bestSelfers" Header="Best Selfers" Click="OnBestSelferRatioClicked"/>
+                    <MenuItem x:Name="_bestAlienSurvivors" Header="Best Alien Survivors" Click="OnBestAlienSurvivorsClicked"/>
+                    <MenuItem x:Name="_bestHumanSurvivors" Header="Best Human Survivors" Click="OnBestHumanSurvivorsClicked"/>
+                    <MenuItem x:Name="_bestAlienForms" Header="Best Alien Forms" Click="OnBestAlienFormsClicked"/>
+                </MenuItem>
+            </Menu>
+        </Grid>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="5"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <Button x:Name="_buttonAnalyze" Content="ANALYZE" Grid.Column="1" Grid.Row="0" Click="OnAnalyzeClicked"/>
+            <Button x:Name="_buttonMassAnalyze" Content="MASS ANALYZE" Grid.Column="3" Grid.Row="0" Click="OnMassAnalyzeclicked"/>
+        </Grid>
+
+        <Grid MinHeight="395" Margin="0 10 0 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="4*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ListBox x:Name="_listBoxReplays" Height="800"/>
+            </ScrollViewer>
+
+            <TextBox x:Name="_textBoxResult" Grid.Column="1" Grid.Row="0" Height="800" FontSize="20" FontWeight="Bold"/>
+        </Grid>
+    </StackPanel>
+</Window>
