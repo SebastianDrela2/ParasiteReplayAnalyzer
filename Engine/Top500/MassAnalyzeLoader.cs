@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Newtonsoft.Json;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using ParasiteReplayAnalyzer.Engine.ReplayComponents;
