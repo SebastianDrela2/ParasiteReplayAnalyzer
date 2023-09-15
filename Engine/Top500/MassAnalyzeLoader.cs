@@ -1,30 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
+using ParasiteReplayAnalyzer.Engine.ReplayComponents;
 
 namespace ParasiteReplayAnalyzer.Engine.Top500
 {
     public class MassAnalyzeLoader
     {
-        private string _replaysPath =>
-            @"C:\Users\Seba\source\repos\ParasiteReplayAnalyzer\ParasiteReplayAnalyzer\ReplayResults";
+        public string ReplaysPath;
 
         public MassAnalyzeLoader()
         {
+            var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var csprojDir = ReplayFolderData.GetCsprojDirectory(assemblyPath);
 
+            ReplaysPath = Path.Combine(csprojDir, "ReplayResults");
         }
 
         public List<ParasiteData> Load()
         {
             var parasiteDatas = new List<ParasiteData>();
 
-            var analyzedReplays = Directory.GetFiles(_replaysPath, "*.json", SearchOption.AllDirectories);
+            var analyzedReplays = Directory.GetFiles(ReplaysPath, "*.json", SearchOption.AllDirectories);
 
             foreach (var analyzedReplay in analyzedReplays)
             {

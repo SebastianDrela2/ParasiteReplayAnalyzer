@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace ParasiteReplayAnalyzer.Engine.ReplayComponents
 {
@@ -12,6 +14,23 @@ namespace ParasiteReplayAnalyzer.Engine.ReplayComponents
         {
             ReplayFolderCode = replayFolderCode;
             ReplaysData = replaysData;
+        }
+
+        public static string GetCsprojDirectory(string currentDirectory)
+        {
+            while (currentDirectory != null)
+            {
+                var solutionFiles = Directory.GetFiles(currentDirectory, "*.csproj");
+
+                if (solutionFiles.Any())
+                {
+                    return currentDirectory;
+                }
+
+                currentDirectory = Directory.GetParent(currentDirectory)?.FullName;
+            }
+
+            return null;
         }
     }
 }

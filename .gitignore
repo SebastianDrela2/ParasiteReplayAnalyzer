@@ -1,2 +1,15 @@
-/bin/*
-/ReplayResults/*
+# Ignore build-related directories and files
+/bin/
+/obj/
+/[Uu]I/
+/ReplayResults/
+/build/
+/packages/
+.vs/
+.idea/
+
+# Ignore build artifacts and configuration files
+*.suo
+*.user
+*.userprefs
+*.sln.docstates
