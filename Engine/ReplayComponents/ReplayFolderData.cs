@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace ParasiteReplayAnalyzer.Engine.ReplayComponents
 {
@@ -16,7 +17,7 @@ namespace ParasiteReplayAnalyzer.Engine.ReplayComponents
             ReplaysData = replaysData;
         }
 
-        public static string GetCsprojDirectory(string currentDirectory)
+        private static string GetCsprojDirectory(string currentDirectory)
         {
             while (currentDirectory != null)
             {
@@ -31,6 +32,16 @@ namespace ParasiteReplayAnalyzer.Engine.ReplayComponents
             }
 
             return null;
+        }
+
+        public static string GetReplayResultsPath()
+        {
+            var debugPath = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
+
+            var csProj = GetCsprojDirectory(debugPath);
+            var result = Path.Combine(csProj, "ReplayResults");
+
+            return result;
         }
     }
 }

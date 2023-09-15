@@ -13,10 +13,7 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
 
         public MassAnalyzeLoader()
         {
-            var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var csprojDir = ReplayFolderData.GetCsprojDirectory(assemblyPath);
-
-            ReplaysPath = Path.Combine(csprojDir, "ReplayResults");
+            ReplaysPath = ReplayFolderData.GetReplayResultsPath();
         }
 
         public List<ParasiteData> Load()
