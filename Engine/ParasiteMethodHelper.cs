@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using IronPython.Modules;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ParasiteReplayAnalyzer.Engine
 {
@@ -73,18 +74,19 @@ namespace ParasiteReplayAnalyzer.Engine
         public Dictionary<DetailsPlayer, int> GetPlayerKills(ICollection<DetailsPlayer> detailsPlayers, ICollection<SUnitBornEvent> sUnitBornEvents)
         {
             var playersKillsDict = detailsPlayers.ToDictionary(player => player, _ => 0);
-            var filters = new HashSet<string>(ReadResource("ParasiteReplayAnalyzer.Filters.UnitsThatCountAsPlayerKills.txt"));
+            var unitsThatCountAsPlayerKills = new HashSet<string>(ReadResource("ParasiteReplayAnalyzer.Filters.UnitsThatCountAsPlayerKills.txt"));
 
             foreach (var sUnitBornEvent in sUnitBornEvents)
             {
-                if (sUnitBornEvent.SUnitDiedEvent?.KillerUnitBornEvent != null)
+                var killerBornEvent = sUnitBornEvent.SUnitDiedEvent?.KillerUnitBornEvent;
+
+                if (killerBornEvent != null)
                 {
-                    var killerBornEvent = sUnitBornEvent.SUnitDiedEvent.KillerUnitBornEvent;
                     var player = ConvertIdToPlayer(killerBornEvent.ControlPlayerId - 1, detailsPlayers);
 
-                    if (player != null && filters.Contains(sUnitBornEvent.UnitTypeName))
+                    if (player != null && unitsThatCountAsPlayerKills.Contains(sUnitBornEvent.UnitTypeName))
                     {
-                        if (IsAlienOrStationSecurity(player.Name) || filters.Contains(killerBornEvent.UnitTypeName))
+                        if (IsAlienOrStationSecurity(player.Name) || unitsThatCountAsPlayerKills.Contains(killerBornEvent.UnitTypeName))
                         {
                             playersKillsDict[player]++;
                         }
@@ -273,7 +275,7 @@ namespace ParasiteReplayAnalyzer.Engine
             return playerName is "Alien AI" or "Station Security";
         }
 
-        private List<string>? ReadResource(string resourceName)
+        private List<string> ReadResource(string resourceName)
         {
             var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
 

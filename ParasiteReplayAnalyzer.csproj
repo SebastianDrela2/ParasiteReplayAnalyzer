@@ -9,12 +9,16 @@
 
   <ItemGroup>
     <None Remove="Filters\HostEvolutions.txt" />
+    <None Remove="Filters\UnitsThatCanKillButKillDoesNotCount.txt" />
     <None Remove="Filters\UnitsThatCountAsPlayerKills.txt" />
     <None Remove="Filters\UpgradeEventsFilters.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Filters\HostEvolutions.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Filters\UnitsThatCanKillButKillDoesNotCount.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Filters\UnitsThatCountAsPlayerKills.txt">
