@@ -219,7 +219,6 @@ namespace ParasiteReplayAnalyzer.UI
 
                 watch = new Stopwatch();
                 watch.Start();
-                
             });
 
             return watch;
