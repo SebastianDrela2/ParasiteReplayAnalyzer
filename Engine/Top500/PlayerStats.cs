@@ -82,8 +82,8 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
         {
             var playerData = parasiteData.PlayerDatas.FirstOrDefault(x => x.Handle == kvp.Key);
 
-            double playerKills = parasiteData.PlayersKills.FirstOrDefault(x => x.Key == kvp.Value).Value;
-            double killedByAnotherPlayerAmmount = !playerData.IsAlive ? 1 : 0;
+            double playerKills = parasiteData.PlayersKills.FirstOrDefault(x => x.Key == kvp.Key).Value;
+            double killedByAnotherPlayerAmmount = playerData.IsAlive ? 1 : 0;
 
             double spawnedAmmount = playerData.IsSpawn ? 1 : 0;
 

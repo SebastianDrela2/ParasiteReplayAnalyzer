@@ -62,7 +62,7 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
         public List<PlayerStats> GetBestKillers()
         {
             var bestKillers = _playerStats.Where(x => x.HumanGames > 15)
-                .OrderByDescending(x => x.AnotherPlayerKills == 0 || x.KillsByAnotherPlayer == 0 ? 0.0 : (x.AnotherPlayerKills / x.KillsByAnotherPlayer).RoundUpToSecondDigitAfterZero()).ToList();
+                .OrderByDescending(x => x.AnotherPlayerKills == 0 || x.KillsByAnotherPlayer == 0 ? 0.0 : (x.AnotherPlayerKills / x.KillsByAnotherPlayer)).ToList();
 
             return bestKillers;
         }
