@@ -211,13 +211,13 @@ namespace ParasiteReplayAnalyzer.UI
                     }
 
                     var leftReplaysToAnalyze = ammountOfTasks - completedReplays;
-                    var estimatedtimeLeft = GetEstimatedTimeLeft(leftReplaysToAnalyze, watch.ElapsedMilliseconds);
+                    var estimatedTimeLeft = GetEstimatedTimeLeft(leftReplaysToAnalyze, watch.ElapsedMilliseconds);
 
 
-                    if (estimatedtimeLeft is not { Hours: 0, Minutes: 0, Seconds: 0 })
+                    if (estimatedTimeLeft is not { Hours: 0, Minutes: 0, Seconds: 0 })
                     {
                         _textBoxResult.Text = $"Analyzed {completedReplays}/{ammountOfTasks}\n" +
-                                              $"Estimated time left: {estimatedtimeLeft}";
+                                              $"Estimated time left: {estimatedTimeLeft}";
                     }
 
                     watch = new Stopwatch();
