@@ -155,21 +155,8 @@ namespace ParasiteReplayAnalyzer.UI
                             .ContinueWith(async task =>
                             {
                                 completedReplays++;
-
                                 watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays,
-                                    cancellationTokenSource.Token);
-
-                                var estimatedTimeLeft = GetEstimatedTimeLeft(replayTasks.Count - completedReplays,
-                                    watch.ElapsedMilliseconds);
-
-                                if (estimatedTimeLeft is not { Hours: 0, Minutes: 0, Seconds: 0 })
-                                {
-                                    Application.Current.Dispatcher.Invoke(() =>
-                                    {
-                                        _textBoxResult.Text = $"Analyzed {completedReplays}/{replayTasks.Count}\n" +
-                                                              $"Estimated time left: {estimatedTimeLeft}";
-                                    });
-                                }
+                                        cancellationTokenSource.Token);
                             }, cancellationTokenSource.Token));
                     }
 
@@ -226,8 +213,13 @@ namespace ParasiteReplayAnalyzer.UI
                     var leftReplaysToAnalyze = ammountOfTasks - completedReplays;
                     var estimatedtimeLeft = GetEstimatedTimeLeft(leftReplaysToAnalyze, watch.ElapsedMilliseconds);
 
-                    _textBoxResult.Text = $"Analyzed {completedReplays}/{ammountOfTasks}\n" +
-                                          $"Estimated time left: {estimatedtimeLeft}";
+
+                    if (estimatedtimeLeft is not { Hours: 0, Minutes: 0, Seconds: 0 })
+                    {
+                        _textBoxResult.Text = $"Analyzed {completedReplays}/{ammountOfTasks}\n" +
+                                              $"Estimated time left: {estimatedtimeLeft}";
+                    }
+
                     watch = new Stopwatch();
                     watch.Start();
                 }
