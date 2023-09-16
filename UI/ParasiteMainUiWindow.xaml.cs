@@ -198,31 +198,28 @@ namespace ParasiteReplayAnalyzer.UI
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                lock (_lock)
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
-                    if (watch.IsRunning)
-                    {
-                        watch.Stop();
-                    }
-
-                    var leftReplaysToAnalyze = ammountOfTasks - completedReplays;
-                    var estimatedTimeLeft = GetEstimatedTimeLeft(leftReplaysToAnalyze, watch.ElapsedMilliseconds);
-
-
-                    if (estimatedTimeLeft is not { Hours: 0, Minutes: 0, Seconds: 0 })
-                    {
-                        _textBoxResult.Text = $"Analyzed {completedReplays}/{ammountOfTasks}\n" +
-                                              $"Estimated time left: {estimatedTimeLeft}";
-                    }
-
-                    watch = new Stopwatch();
-                    watch.Start();
+                    return;
                 }
+
+                if (watch.IsRunning)
+                {
+                    watch.Stop();
+                }
+
+                var leftReplaysToAnalyze = ammountOfTasks - completedReplays;
+                var estimatedTimeLeft = GetEstimatedTimeLeft(leftReplaysToAnalyze, watch.ElapsedMilliseconds);
+
+                if (estimatedTimeLeft is not { Hours: 0, Minutes: 0, Seconds: 0 })
+                {
+                    _textBoxResult.Text = $"Analyzed {completedReplays}/{ammountOfTasks}\n" +
+                                          $"Estimated time left: {estimatedTimeLeft}";
+                }
+
+                watch = new Stopwatch();
+                watch.Start();
+                
             });
 
             return watch;
