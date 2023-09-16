@@ -122,7 +122,7 @@ namespace ParasiteReplayAnalyzer.UI
             }
         }
 
-        private async void OnMassAnalyzeClicked(object sender, RoutedEventArgs e)
+        private async void OnMassAnalyzeClickedAsync(object sender, RoutedEventArgs e)
         {
             _textBoxResult.Text = "Started mass replay analysis...\n";
             var files = Directory.GetFiles(_settingsManager.ReplayResultsPath, "*.json", SearchOption.AllDirectories)
@@ -136,57 +136,59 @@ namespace ParasiteReplayAnalyzer.UI
             var allReplays = _replayFolderDatas.SelectMany(y => y.ReplaysData).Select(x => x.ReplayPath);
             var replayTasks = new List<Task>();
             var completedReplays = 0;
-            var lastUiUpdate = DateTime.Now;
 
             var cancellationTokenSource = new CancellationTokenSource();
-
-            try
+            await Task.Run(async() =>
             {
-                foreach (var replay in allReplays)
+                try
                 {
-                    var analyzedReplayCodePath = FileHelperMethods.GetReplayCodeFromPathWithFile(replay);
-
-                    if (files.Contains(analyzedReplayCodePath))
+                    foreach (var replay in allReplays)
                     {
-                        continue;
-                    }
+                        var analyzedReplayCodePath = FileHelperMethods.GetReplayCodeFromPathWithFile(replay);
 
-                    replayTasks.Add(AnalyzeReplayAsync(replay, semaphore, cancellationTokenSource.Token)
-                        .ContinueWith(task =>
+                        if (files.Contains(analyzedReplayCodePath))
                         {
-                            lock (_lock)
+                            continue;
+                        }
+
+                        replayTasks.Add(AnalyzeReplayAsync(replay, semaphore, cancellationTokenSource.Token)
+                            .ContinueWith(async task =>
                             {
                                 completedReplays++;
-                                watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays, cancellationTokenSource.Token);
 
-                                if (DateTime.Now - lastUiUpdate > TimeSpan.FromSeconds(1))
+                                watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays,
+                                    cancellationTokenSource.Token);
+
+                                var estimatedTimeLeft = GetEstimatedTimeLeft(replayTasks.Count - completedReplays,
+                                    watch.ElapsedMilliseconds);
+
+                                if (estimatedTimeLeft is not { Hours: 0, Minutes: 0, Seconds: 0 })
                                 {
-                                    lastUiUpdate = DateTime.Now;
                                     Application.Current.Dispatcher.Invoke(() =>
                                     {
                                         _textBoxResult.Text = $"Analyzed {completedReplays}/{replayTasks.Count}\n" +
-                                                              $"Estimated time left: {GetEstimatedTimeLeft(replayTasks.Count - completedReplays, watch.ElapsedMilliseconds)}";
+                                                              $"Estimated time left: {estimatedTimeLeft}";
                                     });
                                 }
-                            }
-                        }, cancellationTokenSource.Token));
+                            }, cancellationTokenSource.Token));
+                    }
+
+                    await Task.WhenAll(replayTasks);
+                    watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays, cancellationTokenSource.Token);
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _textBoxResult.Text = $"Finished mass replay analysis... Analyzed {replayTasks.Count} Replays";
+                    });
                 }
-
-                await Task.WhenAll(replayTasks);
-                watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays, cancellationTokenSource.Token);
-
-                Application.Current.Dispatcher.Invoke(() =>
+                catch (OperationCanceledException)
                 {
-                    _textBoxResult.Text = $"Finished mass replay analysis... Analyzed {replayTasks.Count} Replays";
-                });
-            }
-            catch (OperationCanceledException)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    _textBoxResult.Text = "Mass replay analysis canceled.";
-                });
-            }
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _textBoxResult.Text = "Mass replay analysis canceled.";
+                    });
+                }
+            }, cancellationTokenSource.Token);
         }
 
         private async Task AnalyzeReplayAsync(string replay, SemaphoreSlim semaphore, CancellationToken cancellationToken)
