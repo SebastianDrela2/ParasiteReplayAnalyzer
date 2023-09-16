@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using IronPython.Modules;
 using ParasiteReplayAnalyzer.Engine;
+using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using ParasiteReplayAnalyzer.Engine.FileHelpers;
 using ParasiteReplayAnalyzer.Engine.ReplayComponents;
 using ParasiteReplayAnalyzer.Engine.Top500;
@@ -193,7 +194,11 @@ namespace ParasiteReplayAnalyzer.UI
             {
                 var humanWinRate = calculator.GetHumanWinrate();
                 var aliensWinRate = calculator.GetAlienWinrate();
-                sb.Append($"Human winrate: {humanWinRate}% \nAlien winrate: {aliensWinRate}%");
+                var undecidedWinrate = calculator.GetUndecidedWinrate();
+
+                sb.Append($"Human winrate: {humanWinRate}% Games: {_parasiteDatas.Count(x => x.VictoryStatus.Equals("Human Win"))} \n" +
+                          $"Alien winrate: {aliensWinRate}% Games: {_parasiteDatas.Count(x => x.VictoryStatus.Equals("Alien Win"))} \n" +
+                          $"Undecided winrate: {undecidedWinrate}% Games: {_parasiteDatas.Count(x => x.VictoryStatus.Equals("Undecided"))} ");
             });
         }
 
@@ -205,7 +210,7 @@ namespace ParasiteReplayAnalyzer.UI
                 var ranking = 1;
                 foreach (var host in bestHosts)
                 {
-                    sb.Append($"#{ranking} {host.PlayerName} Win: {host.HostWins / host.HostGames * 100}% Games: {host.HostGames}\n");
+                    sb.Append($"#{ranking} {host.PlayerName} Win: {(host.HostWins / host.HostGames * 100).RoundUpToSecondDigitAfterZero()}% Games: {host.HostGames}\n");
                     ranking++;
                 }
             });
@@ -219,7 +224,7 @@ namespace ParasiteReplayAnalyzer.UI
                 var ranking = 1;
                 foreach (var human in bestHumans)
                 {
-                    sb.Append($"#{ranking} {human.PlayerName} Win: {human.HumanWins / human.HumanGames * 100}% Games: {human.HumanGames}\n");
+                    sb.Append($"#{ranking} {human.PlayerName} Win: {(human.HumanWins / human.HumanGames * 100).RoundUpToSecondDigitAfterZero()}% Games: {human.HumanGames}\n");
                     ranking++;
                 }
             });
@@ -233,7 +238,7 @@ namespace ParasiteReplayAnalyzer.UI
                 var ranking = 1;
                 foreach (var human in bestKillers)
                 {
-                    sb.Append($"#{ranking} {human.PlayerName} K/D: {human.AnotherPlayerKills / human.KillsByAnotherPlayer} Games: {human.HumanGames}\n");
+                    sb.Append($"#{ranking} {human.PlayerName} K/D: {(human.AnotherPlayerKills / human.KillsByAnotherPlayer).RoundUpToSecondDigitAfterZero()} Games: {human.HumanGames}\n");
                     ranking++;
                 }
             });
@@ -247,7 +252,7 @@ namespace ParasiteReplayAnalyzer.UI
                 var ranking = 1;
                 foreach (var human in bestSelfers)
                 {
-                    sb.Append($"#{ranking} {human.PlayerName} Ratio: {human.SpawnedAmmount / human.HumanGames} Games: {human.HumanGames}\n");
+                    sb.Append($"#{ranking} {human.PlayerName} Ratio: {(human.SpawnedAmmount / human.HumanGames).RoundUpToSecondDigitAfterZero()} Games: {human.HumanGames}\n");
                     ranking++;
                 }
             });
@@ -302,7 +307,7 @@ namespace ParasiteReplayAnalyzer.UI
 
                 foreach (var form in bestForms)
                 {
-                    sb.Append($"#{ranking} {form.Name} WinRate: {form.WinPercentage}% Games: {form.Games}\n");
+                    sb.Append($"#{ranking} {form.Name} WinRate: {form.WinPercentage.RoundUpToSecondDigitAfterZero()}% Games: {form.Games}\n");
                     ranking++;
                 }
             });

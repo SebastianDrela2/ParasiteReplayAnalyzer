@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Data;
 using ParasiteReplayAnalyzer.Engine.Top500;
 
 namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
 {
-    public static class ParasiteExtenstionMethods
+    public static class ExtenstionMethods
     {
         public static void RemoveDuplicates(this List<ParasiteData> parasiteDatas)
         {
@@ -43,6 +45,12 @@ namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
                 var index = listOfPlayerStats.IndexOf(existingPlayerStats);
                 listOfPlayerStats[index] = existingPlayerStats;
             }
+        }
+
+        public static double RoundUpToSecondDigitAfterZero(this double number)
+        {
+            var multiplier = Math.Pow(10, 2);
+            return Math.Ceiling(number * multiplier) / multiplier;
         }
     }
 }
