@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Input;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 
 namespace ParasiteReplayAnalyzer.Engine.Top500
@@ -48,9 +49,17 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
         {
             var listOfPlayerStats = new List<PlayerStats>();
 
+            var handlesExclusionList = new List<string>
+            {
+                "0--0-2",
+                "0-Station-Security-0-2",
+                "0--0-1",
+                "0-AlienAI-0-1"
+            };
+
             foreach (var parasiteData in parasiteDatas)
             {
-                foreach (var handlesKvp in parasiteData.PlayerHandles)
+                foreach (var handlesKvp in parasiteData.PlayerHandles.Where(x => !handlesExclusionList.Contains(x.Key)))
                 {
 
                     var playerStats = CreatePlayerStatsFromParasiteData(parasiteData, handlesKvp);
@@ -71,7 +80,6 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
 
         private static PlayerStats CreatePlayerStatsFromParasiteData(ParasiteData parasiteData, KeyValuePair<string, string> kvp)
         {
-
             var playerData = parasiteData.PlayerDatas.FirstOrDefault(x => x.Handle == kvp.Key);
 
             double playerKills = parasiteData.PlayersKills.FirstOrDefault(x => x.Key == kvp.Value).Value;

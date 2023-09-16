@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
+using ParasiteReplayAnalyzer.Testing;
 using s2protocol.NET;
 using s2protocol.NET.Models;
 using static IronPython.Modules.PythonIterTools;
@@ -72,6 +73,9 @@ namespace ParasiteReplayAnalyzer.Engine
             var dictionaryOfLives = parasiteMethodHelper.GetLifeTimeList(replay.TrackerEvents.SUnitBornEvents, players, replay.Metadata);
 
             var gameLength = replay.Metadata?.Duration ?? 0;
+
+            var testingMethod = new TestingMethods(replay);
+            testingMethod.TestOutcome(replay, parasiteMethodHelper);
 
             return new ParasiteData(replayName, replayKey, gameLength, humanPlayers.Select(x => x.Name), specialRoleTeams[2], specialRoleTeams[1],
                 specialRoleTeams[0], playerHandles, playerKills, dictionaryOfLives, lastEvolution, alivePlayers, spawns, replay, replayPath, players, parasiteMethodHelper);
