@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using ParasiteReplayAnalyzer.Engine;
 using ParasiteReplayAnalyzer.Engine.FileHelpers;
@@ -43,15 +44,27 @@ namespace ParasiteReplayAnalyzer.Saving
             var json = JsonConvert.SerializeObject(data, Formatting.Indented);
 
             var directory = FileHelperMethods.ExtractFirstCharacters(data.FullPath);
+            var directoryPath = Path.Combine(ReplayResultsPath, directory);
 
-            if (!Directory.Exists($@"{ReplayResultsPath}\{directory}"))
-            {
-                Directory.CreateDirectory($@"{ReplayResultsPath}\{directory}");
-            }
+            Directory.CreateDirectory(directoryPath);
 
-            var path =
-                $@"{ReplayResultsPath}\{directory}\{data.ReplayName}.json";
-            File.WriteAllText(path, json);
+            var filePath = Path.Combine(directoryPath, $"{data.ReplayName}.json");
+            File.WriteAllText(filePath, json);
+        }
+
+        public async Task SaveParasiteDataAsync(ParasiteData data)
+        {
+            var json = JsonConvert.SerializeObject(data, Formatting.Indented);
+
+            var directory = FileHelperMethods.ExtractFirstCharacters(data.FullPath);
+            var directoryPath = Path.Combine(ReplayResultsPath, directory);
+
+            Directory.CreateDirectory(directoryPath);
+
+            var filePath = Path.Combine(directoryPath, $"{data.ReplayName}.json");
+
+            await using var writer = new StreamWriter(filePath);
+            await writer.WriteAsync(json);
         }
 
         public string GetDefaultReplaysPath()

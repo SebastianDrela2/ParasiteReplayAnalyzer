@@ -198,7 +198,8 @@ namespace ParasiteReplayAnalyzer.UI
             {
                 var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
                 await parasiteAnalyzer.LoadParasiteData();
-                _settingsManager.SaveParasiteData(parasiteAnalyzer.ParasiteData);
+
+                _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
             }
             finally
             {
