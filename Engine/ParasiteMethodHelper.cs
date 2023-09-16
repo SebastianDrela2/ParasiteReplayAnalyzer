@@ -222,19 +222,19 @@ namespace ParasiteReplayAnalyzer.Engine
 
         public List<DetailsPlayer?> GetSpecialRoleTeams(ICollection<DetailsPlayer> players, ICollection<SUpgradeEvent> upgradeEvents)
         {
-            return new List<DetailsPlayer>
+            return new List<DetailsPlayer?>
             {
-                GetPlayerByUpgrade("AlienIdentificationUpgrade2", upgradeEvents, players),
-                GetPlayerByUpgrade("PlayerIsPsion",upgradeEvents, players),
-                GetPlayerByUpgrade("PlayerisAndroid",upgradeEvents, players),
+                GetPlayerByUpgrade("AlienIdentificationUpgrade2",upgradeEvents, players),
+                GetPlayerByUpgrade("PlayerIsPsion", upgradeEvents, players),
+                GetPlayerByUpgrade("PlayerisAndroid", upgradeEvents, players),
                 new DetailsPlayer(new PlayerColor(999,999,999,999),13,0,"","Alien AI",0,"AI",0,0,new Toon(1,"",0,0), 13),
-                new DetailsPlayer(new PlayerColor(999,999,999,999),13,0,"","Station Security",0,"AI",0,0,new Toon(2,"",0,0), 14)
+                new DetailsPlayer(new PlayerColor(999,999,999,999),14,0,"","Station Security",0,"AI",0,0,new Toon(2,"",0,0), 14)
             };
         }
 
         public  List<DetailsPlayer> GetHumanPlayers(ICollection<DetailsPlayer> players, List<DetailsPlayer?> specialRoleTeams)
         {
-            return players.Select(player => player).Where(player => specialRoleTeams.All(specialRole => specialRole?.Toon != player.Toon)).ToList();
+            return players.Where(player => specialRoleTeams.All(specialRole => specialRole?.Toon != player.Toon)).ToList();
         }
 
         public DetailsPlayer? GetPlayerByUpgrade(string upgradeType, ICollection<SUpgradeEvent> upgradeEvents, ICollection<DetailsPlayer> players)

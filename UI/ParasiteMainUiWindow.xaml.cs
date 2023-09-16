@@ -92,7 +92,7 @@ namespace ParasiteReplayAnalyzer.UI
             return replayName.Contains("P A R A S I T E - TEST");
         }
 
-        private void OnAnalyzeClicked(object sender, RoutedEventArgs e)
+        private async void OnAnalyzeClicked(object sender, RoutedEventArgs e)
         {
             if (_listBoxReplays.SelectedItem != null)
             {
@@ -100,7 +100,7 @@ namespace ParasiteReplayAnalyzer.UI
 
                 if (selectedItem != null)
                 {
-                    Task.Run(() =>
+                    Task.Run(async() =>
                     {
                         var watch = new Stopwatch();
                         watch.Start();
@@ -108,8 +108,9 @@ namespace ParasiteReplayAnalyzer.UI
                         var replayPath = FileHelperMethods.GetReplayPath(selectedItem, _replayFolderDatas);
 
                         var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
+                        await parasiteAnalyzer.LoadParasiteData();
 
-                        _settingsManager.SaveParasiteData(parasiteAnalyzer.ParasiteData);
+                        await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
                         watch.Stop();
 
                         Application.Current.Dispatcher.Invoke(() =>

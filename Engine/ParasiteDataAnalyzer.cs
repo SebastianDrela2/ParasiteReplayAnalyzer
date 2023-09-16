@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using s2protocol.NET;
 using s2protocol.NET.Models;
+using static IronPython.Modules.PythonIterTools;
 
 namespace ParasiteReplayAnalyzer.Engine
 {
@@ -29,7 +31,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
             if (sc2Replay != null)
             {
-                ParasiteData = await Task.Run(() =>GetParasiteData(sc2Replay, _parasiteReplayPath));
+                ParasiteData = await Task.Run(() => GetParasiteData(sc2Replay, _parasiteReplayPath));
             }
         }
 
@@ -52,10 +54,9 @@ namespace ParasiteReplayAnalyzer.Engine
             var upgradeEvents = parasiteMethodHelper.FilterUpgradeEvents(replay.TrackerEvents.SUpgradeEvents);
 
             var players = replay.Details.Players.ToList();
-            var alienAi = players.LastOrDefault();
-            var index = players.IndexOf(alienAi);
 
-            players[index] = alienAi.ChangeAlienIntoAlienAI();
+            players!.ModifySecondToLastAndLastPlayers();
+
             var playerHandles = parasiteMethodHelper.GetHandlesList(players);
 
             var replayKey = GetReplayKey(players);
@@ -68,15 +69,15 @@ namespace ParasiteReplayAnalyzer.Engine
             var playerKills = parasiteMethodHelper.GetPlayerKills(players, replay.TrackerEvents.SUnitBornEvents);
 
             var alivePlayers = parasiteMethodHelper.GetAlivePlayers(players, replay.TrackerEvents.SUnitBornEvents, spawns, specialRoleTeams[0]);
-            var dictionaryOfLifes = parasiteMethodHelper.GetLifeTimeList(replay.TrackerEvents.SUnitBornEvents, players, replay.Metadata);
+            var dictionaryOfLives = parasiteMethodHelper.GetLifeTimeList(replay.TrackerEvents.SUnitBornEvents, players, replay.Metadata);
 
             var gameLength = replay.Metadata?.Duration ?? 0;
 
             return new ParasiteData(replayName, replayKey, gameLength, humanPlayers.Select(x => x.Name), specialRoleTeams[2], specialRoleTeams[1],
-                specialRoleTeams[0], playerHandles, playerKills, dictionaryOfLifes, lastEvolution, alivePlayers, spawns, replay, replayPath, players, parasiteMethodHelper);
+                specialRoleTeams[0], playerHandles, playerKills, dictionaryOfLives, lastEvolution, alivePlayers, spawns, replay, replayPath, players, parasiteMethodHelper);
         }
 
-        private string GetReplayKey(ICollection<DetailsPlayer> detailsPlayers)
+        private string GetReplayKey(IEnumerable<DetailsPlayer> detailsPlayers)
         {
             var key = string.Empty;
 

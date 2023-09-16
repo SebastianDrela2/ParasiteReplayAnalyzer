@@ -31,21 +31,23 @@ namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
         {
             var existingPlayerStats = listOfPlayerStats.FirstOrDefault(x => x.Handles == kvp.Key);
 
-            if (existingPlayerStats != null)
+            if (existingPlayerStats == null)
             {
-                existingPlayerStats.AnotherPlayerKills += incomingPlayerStats.AnotherPlayerKills;
-                existingPlayerStats.KillsByAnotherPlayer += incomingPlayerStats.KillsByAnotherPlayer;
-                existingPlayerStats.HostGames += incomingPlayerStats.HostGames;
-                existingPlayerStats.HostWins += incomingPlayerStats.HostWins;
-                existingPlayerStats.HumanGames += incomingPlayerStats.HumanGames;
-                existingPlayerStats.HumanWins += incomingPlayerStats.HumanWins;
-                existingPlayerStats.SpawnedAmmount += incomingPlayerStats.SpawnedAmmount;
-                existingPlayerStats.SurvivedTimeHuman += incomingPlayerStats.SurvivedTimeHuman;
-                existingPlayerStats.SurvivedTimeAlien += incomingPlayerStats.SurvivedTimeAlien;
-
-                var index = listOfPlayerStats.IndexOf(existingPlayerStats);
-                listOfPlayerStats[index] = existingPlayerStats;
+                return;
             }
+
+            existingPlayerStats.AnotherPlayerKills += incomingPlayerStats.AnotherPlayerKills;
+            existingPlayerStats.KillsByAnotherPlayer += incomingPlayerStats.KillsByAnotherPlayer;
+            existingPlayerStats.HostGames += incomingPlayerStats.HostGames;
+            existingPlayerStats.HostWins += incomingPlayerStats.HostWins;
+            existingPlayerStats.HumanGames += incomingPlayerStats.HumanGames;
+            existingPlayerStats.HumanWins += incomingPlayerStats.HumanWins;
+            existingPlayerStats.SpawnedAmmount += incomingPlayerStats.SpawnedAmmount;
+            existingPlayerStats.SurvivedTimeHuman += incomingPlayerStats.SurvivedTimeHuman;
+            existingPlayerStats.SurvivedTimeAlien += incomingPlayerStats.SurvivedTimeAlien;
+
+            var index = listOfPlayerStats.IndexOf(existingPlayerStats);
+            listOfPlayerStats[index] = existingPlayerStats;
         }
 
         public static double RoundUpToSecondDigitAfterZero(this double number)
@@ -54,13 +56,38 @@ namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
             return Math.Ceiling(number * multiplier) / multiplier;
         }
 
-        public static DetailsPlayer? ChangeAlienIntoAlienAI(this DetailsPlayer? alienAi)
+        public static DetailsPlayer ChangeAlienIntoAlienAi(this DetailsPlayer? alienAi)
         {
             alienAi = new DetailsPlayer(alienAi.Color, alienAi.Control,alienAi.Handicap, alienAi.Hero, "Alien AI",alienAi.Observe,
                 alienAi.Race, alienAi.Result, alienAi.TeamId, new Toon(1,"",0,0), alienAi.WorkingSetSlotId);
 
             return alienAi;
 
+        }
+
+        public static DetailsPlayer ChangeStationSecurityIntoStationSecurityAi(this DetailsPlayer? stationSecurityAi)
+        {
+            stationSecurityAi = new DetailsPlayer(stationSecurityAi.Color, stationSecurityAi.Control, stationSecurityAi.Handicap, stationSecurityAi.Hero, "Station Security", stationSecurityAi.Observe,
+                stationSecurityAi.Race, stationSecurityAi.Result, stationSecurityAi.TeamId, new Toon(2, "", 0, 0), stationSecurityAi.WorkingSetSlotId);
+
+            return stationSecurityAi;
+
+        }
+
+        public static void ModifySecondToLastAndLastPlayers(this List<DetailsPlayer?> players)
+        {
+            if (players.Count < 2)
+            {
+                return;
+            }
+
+            var stationSecurityAi = players.ElementAt(players.Count - 2);
+            var stationAiIndex = players.IndexOf(stationSecurityAi);
+            players[stationAiIndex] = stationSecurityAi.ChangeStationSecurityIntoStationSecurityAi();
+
+            var alienAi = players.Last();
+            var alienAiIndex = players.IndexOf(alienAi);
+            players[alienAiIndex] = alienAi.ChangeAlienIntoAlienAi();
         }
     }
 }
