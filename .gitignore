@@ -1,7 +1,6 @@
 # Ignore build-related directories and files
 /bin/
 /obj/
-/[Uu]I/
 /ReplayResults/
 /build/
 /packages/

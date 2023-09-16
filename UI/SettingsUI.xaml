@@ -1,0 +1,35 @@
+﻿<Window x:Class="ParasiteReplayAnalyzer.UI.SettingsUI"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ParasiteReplayAnalyzer.UI"
+        mc:Ignorable="d"
+        Title="SettingsUI" Height="100" Width="300" WindowStartupLocation="CenterScreen">
+    <StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2"/>
+                <ColumnDefinition Width="3*"/>
+                <ColumnDefinition Width="5"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Replays Path:"  Grid.Column="1" Grid.Row="0"/>
+            <TextBox x:Name="_pathTextBox" Grid.Column="3" Grid.Row="0"/>
+        </Grid>
+
+        <Grid MinHeight="20" Margin="0 10 0 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.25*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="1.25*"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="1" Content="OK" Click="OnOkClicked"/>
+        </Grid>
+
+        
+    </StackPanel>
+</Window>
