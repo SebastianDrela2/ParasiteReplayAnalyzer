@@ -4,13 +4,14 @@ using System.Linq;
 using Newtonsoft.Json;
 using ParasiteReplayAnalyzer.Engine;
 using ParasiteReplayAnalyzer.Engine.FileHelpers;
+using ParasiteReplayAnalyzer.Engine.ReplayComponents;
 
 namespace ParasiteReplayAnalyzer.Saving
 {
-    internal class SettingsManager
+    public class SettingsManager
     {
-        public string ReplayResultsPath =>
-            @"C:\Users\Seba\source\repos\ParasiteReplayAnalyzer\ParasiteReplayAnalyzer\ReplayResults";
+        public Settings Settings => LoadSettings();
+        public string ReplayResultsPath => ReplayFolderData.GetReplayResultsPath();
 
         public string SettingsPath => GetDefaultSettingsPath();
 
@@ -20,12 +21,10 @@ namespace ParasiteReplayAnalyzer.Saving
             return JsonConvert.DeserializeObject<Settings>(json);
         }
 
-        public void SaveDefaultSettings()
+        public void SaveSettings(string replaysPath)
         {
-            var defaultReplaysPath = GetDefaultReplaysPath();
-
             var settings =
-                new Settings(defaultReplaysPath);
+                new Settings(replaysPath);
 
             var parentDirectory = Directory.GetParent(SettingsPath).FullName;
 
@@ -53,11 +52,9 @@ namespace ParasiteReplayAnalyzer.Saving
             var path =
                 $@"{ReplayResultsPath}\{directory}\{data.ReplayName}.json";
             File.WriteAllText(path, json);
-
-            Console.WriteLine($"Analyzed: {data.ReplayName}");
         }
 
-        private string GetDefaultReplaysPath()
+        public string GetDefaultReplaysPath()
         {
             var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             var accountsPath = $@"{documentsPath}\StarCraft II\Accounts";
@@ -72,7 +69,7 @@ namespace ParasiteReplayAnalyzer.Saving
             return defaultReplaysPath;
         }
 
-        private string GetDefaultSettingsPath()
+        public string GetDefaultSettingsPath()
         {
             var settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ParasiteReplayAnalyzer", "Settings");
             var settingsFileName = "settings.json";

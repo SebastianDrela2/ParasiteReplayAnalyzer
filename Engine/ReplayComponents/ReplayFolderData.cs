@@ -43,5 +43,7 @@ namespace ParasiteReplayAnalyzer.Engine.ReplayComponents
 
             return result;
         }
+
+       
     }
 }

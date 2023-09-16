@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,7 +23,6 @@ namespace ParasiteReplayAnalyzer.UI
     {
         private MassAnalyzeLoader _massAnalyzeLoader = new();
         private SettingsManager _settingsManager;
-        private Settings? _settings;
         private List<ReplayFolderData> _replayFolderDatas = new();
         private List<ParasiteData> _parasiteDatas;
 
@@ -39,23 +39,27 @@ namespace ParasiteReplayAnalyzer.UI
         {
             if (File.Exists(_settingsManager.SettingsPath))
             {
-                _settings = _settingsManager.LoadSettings();
+                _settingsManager.LoadSettings();
             }
             else
             {
-                _settingsManager.SaveDefaultSettings();
-                _settings = _settingsManager.LoadSettings();
+                var defaultReplaysPath = _settingsManager.GetDefaultReplaysPath();
+
+                _settingsManager.SaveSettings(defaultReplaysPath);
+                _settingsManager.LoadSettings();
             }
         }
 
-        private async void LoadReplaysAsync()
+        public async void LoadReplaysAsync()
         {
             _parasiteDatas = await Task.Run(() => _massAnalyzeLoader.Load());
         }
 
-        private void FillListBoxItems()
+        public void FillListBoxItems()
         {
-            var allFileNames = Directory.GetFiles(_settings.Sc2ReplayDirectoryPath, "*.Sc2Replay", SearchOption.AllDirectories);
+            _listBoxReplays.Items.Clear();
+
+            var allFileNames = Directory.GetFiles(_settingsManager.Settings.Sc2ReplayDirectoryPath, "*.Sc2Replay", SearchOption.AllDirectories);
 
             foreach (var path in allFileNames)
             {
@@ -96,60 +100,79 @@ namespace ParasiteReplayAnalyzer.UI
                 {
                     Task.Run(() =>
                     {
+                        var watch = new Stopwatch();
+                        watch.Start();
+
                         var replayPath = FileHelperMethods.GetReplayPath(selectedItem, _replayFolderDatas);
 
                         var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
 
                         _settingsManager.SaveParasiteData(parasiteAnalyzer.ParasiteData);
-                    }).ConfigureAwait(true);
+                        watch.Stop();
 
-                    Application.Current.Dispatcher.Invoke(() => { });
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            _textBoxResult.Text += $"Analyzed: {parasiteAnalyzer.ParasiteData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
+                        });
+                        
+                    }).ConfigureAwait(true);
                 }
             }
         }
 
-        private void OnMassAnalyzeclicked(object sender, RoutedEventArgs e)
+        private async void OnMassAnalyzeClicked(object sender, RoutedEventArgs e)
         {
-            var files = Directory.GetFiles(_settingsManager.ReplayResultsPath, "*.json", SearchOption.AllDirectories);
+            _textBoxResult.Text = "Started mass replay analysis...\n";
+            var files = Directory.GetFiles(_settingsManager.ReplayResultsPath, "*.json", SearchOption.AllDirectories).Select(FileHelperMethods.GetParentDirectoryNameWithFile);
 
             var maxConcurrentTasks = 15;
             var semaphore = new SemaphoreSlim(maxConcurrentTasks);
 
             var allReplays = _replayFolderDatas.SelectMany(y => y.ReplaysData).Select(x => x.ReplayPath);
-
+            var replayTasks = new List<Task>();
+            var completedReplays = 0;
             foreach (var replay in allReplays)
             {
-                try
+                var analyzedReplayCodePath = FileHelperMethods.GetReplayCodeFromPathWithFile(replay);
+
+                if (files.Contains(analyzedReplayCodePath))
                 {
-                    if (files.Contains(replay))
+                    continue;
+                }
+                
+                var task = Task.Run(async() =>
+                {
+                    await semaphore.WaitAsync();
+
+                    try
                     {
-                        continue;
+                        var watch = new Stopwatch();
+                        watch.Start();
+
+                        var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
+                        _settingsManager.SaveParasiteData(parasiteAnalyzer.ParasiteData);
+
+                        watch.Stop();
+
+                        completedReplays++;
+
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            _textBoxResult.Text = $"Analyzed {completedReplays}/{replayTasks.Count}";
+                        });
                     }
-
-                    Task.Run(async () =>
+                    finally
                     {
-                        await semaphore.WaitAsync();
+                        semaphore.Release();
+                    }
+                });
 
-                        try
-                        {
-                            var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
-
-                            _settingsManager.SaveParasiteData(parasiteAnalyzer.ParasiteData);
-                        }
-                        finally
-                        {
-                            semaphore.Release();
-                        }
-                    });
-
-                    Console.WriteLine($"Launched Analyzer task of {Path.GetFileNameWithoutExtension(replay)} ");
-                }
-                catch (Exception exception)
-                {
-                    Console.WriteLine(exception);
-                    throw;
-                }
+                replayTasks.Add(task);
             }
+
+            await Task.WhenAll(replayTasks);
+
+            _textBoxResult.Text = $"Finished mass replay analysis... Analyzed {replayTasks.Count} Replays";
         }
 
         private void UpdateTextBoxResult(Action<MassAnalyzeCalculator, StringBuilder> action)
@@ -283,6 +306,11 @@ namespace ParasiteReplayAnalyzer.UI
                     ranking++;
                 }
             });
+        }
+
+        private void OnMenuItemOptionsClicked(object sender, RoutedEventArgs e)
+        {
+            var settingsWindow = new SettingsUI(_settingsManager, this);
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace ParasiteReplayAnalyzer.Saving
 {
-    internal class Settings
+    public class Settings
     {
         [JsonProperty]
         public string Sc2ReplayDirectoryPath { get; set; }

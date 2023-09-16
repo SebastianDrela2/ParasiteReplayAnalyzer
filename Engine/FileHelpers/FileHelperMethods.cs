@@ -81,5 +81,26 @@ namespace ParasiteReplayAnalyzer.Engine.FileHelpers
 
             return replayPath;
         }
+
+        public static string GetParentDirectoryNameWithFile(string path)
+        {
+            var replayCode = Directory.GetParent(path).Name;
+
+            var file = Path.GetFileNameWithoutExtension(path);
+
+            var result = $@"{replayCode}\{file}";
+
+            return result;
+        }
+
+        public static string GetReplayCodeFromPathWithFile(string path)
+        {
+            var replayCode = ExtractFirstCharacters(path);
+            var file = Path.GetFileNameWithoutExtension(path);
+
+            var result = $@"{replayCode}\{file}";
+
+            return result;
+        }
     }
 }
