@@ -53,7 +53,7 @@ namespace ParasiteReplayAnalyzer.Engine
             var replayName = Path.GetFileNameWithoutExtension(replay.FileName);
             var upgradeEvents = parasiteMethodHelper.FilterUpgradeEvents(replay.TrackerEvents.SUpgradeEvents);
 
-            var players = replay.Details.Players.ToList();
+            var players = replay.Details!.Players.ToList();
 
             players!.ModifySecondToLastAndLastPlayers();
 
