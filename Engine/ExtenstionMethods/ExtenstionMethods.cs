@@ -59,7 +59,7 @@ namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
         public static DetailsPlayer ChangeAlienIntoAlienAi(this DetailsPlayer? alienAi)
         {
             alienAi = new DetailsPlayer(alienAi.Color, alienAi.Control,alienAi.Handicap, alienAi.Hero, "Alien AI",alienAi.Observe,
-                alienAi.Race, alienAi.Result, alienAi.TeamId, new Toon(1,"",0,0), alienAi.WorkingSetSlotId);
+                alienAi.Race, alienAi.Result, alienAi.TeamId, new Toon(1,"AlienAI",0,0), alienAi.WorkingSetSlotId);
 
             return alienAi;
 
@@ -68,7 +68,7 @@ namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
         public static DetailsPlayer ChangeStationSecurityIntoStationSecurityAi(this DetailsPlayer? stationSecurityAi)
         {
             stationSecurityAi = new DetailsPlayer(stationSecurityAi.Color, stationSecurityAi.Control, stationSecurityAi.Handicap, stationSecurityAi.Hero, "Station Security", stationSecurityAi.Observe,
-                stationSecurityAi.Race, stationSecurityAi.Result, stationSecurityAi.TeamId, new Toon(2, "", 0, 0), stationSecurityAi.WorkingSetSlotId);
+                stationSecurityAi.Race, stationSecurityAi.Result, stationSecurityAi.TeamId, new Toon(2, "Station-Security", 0, 0), stationSecurityAi.WorkingSetSlotId);
 
             return stationSecurityAi;
 
