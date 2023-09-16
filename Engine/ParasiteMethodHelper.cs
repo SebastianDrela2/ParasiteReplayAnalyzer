@@ -3,28 +3,29 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using IronPython.Modules;
 
 namespace ParasiteReplayAnalyzer.Engine
 {
     public class ParasiteMethodHelper
     {
-        public static string? ConvertIdToString(int userId, ICollection<DetailsPlayer> players)
+        public static DetailsPlayer? ConvertIdToPlayer(int userId, ICollection<DetailsPlayer> players)
         {
             foreach (var player in players)
             {
                 if (player.WorkingSetSlotId == userId)
                 {
-                    return player.Name;
+                    return player;
                 }
             }
 
             return null;
         }
 
-        public List<string> GetSpawns(ICollection<SUpgradeEvent> upgradeEvents, ICollection<DetailsPlayer> detailsPlayers)
+        public List<DetailsPlayer> GetSpawns(ICollection<SUpgradeEvent> upgradeEvents, ICollection<DetailsPlayer> detailsPlayers)
         {
             var spawnUpgradeSet = new HashSet<string>();
-            var spawnList = new List<string>();
+            var spawnList = new List<DetailsPlayer>();
 
             foreach (var upgradeEvent in upgradeEvents)
             {
@@ -35,7 +36,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
                     if (player != null)
                     {
-                        spawnList.Add(player.Name);
+                        spawnList.Add(player);
                     }
                 }
             }
@@ -68,9 +69,9 @@ namespace ParasiteReplayAnalyzer.Engine
             return bornEvents.LastOrDefault(x => filters.Contains(x.UnitTypeName)).UnitTypeName;
         }
 
-        public Dictionary<string, int> GetPlayerKills(ICollection<DetailsPlayer> detailsPlayers, ICollection<SUnitBornEvent> sUnitBornEvents)
+        public Dictionary<DetailsPlayer, int> GetPlayerKills(ICollection<DetailsPlayer> detailsPlayers, ICollection<SUnitBornEvent> sUnitBornEvents)
         {
-            var playersKillsDict = detailsPlayers.ToDictionary(player => player.Name, _ => 0);
+            var playersKillsDict = detailsPlayers.ToDictionary(player => player, _ => 0);
             var filters = new HashSet<string>(ReadResource("ParasiteReplayAnalyzer.Filters.UnitsThatCountAsPlayerKills.txt"));
 
             foreach (var sUnitBornEvent in sUnitBornEvents)
@@ -78,11 +79,11 @@ namespace ParasiteReplayAnalyzer.Engine
                 if (sUnitBornEvent.SUnitDiedEvent?.KillerUnitBornEvent != null)
                 {
                     var killerBornEvent = sUnitBornEvent.SUnitDiedEvent.KillerUnitBornEvent;
-                    var player = ConvertIdToString(killerBornEvent.ControlPlayerId - 1, detailsPlayers);
+                    var player = ConvertIdToPlayer(killerBornEvent.ControlPlayerId - 1, detailsPlayers);
 
                     if (player != null && filters.Contains(sUnitBornEvent.UnitTypeName))
                     {
-                        if (IsAlienOrStationSecurity(player) || filters.Contains(killerBornEvent.UnitTypeName))
+                        if (IsAlienOrStationSecurity(player.Name) || filters.Contains(killerBornEvent.UnitTypeName))
                         {
                             playersKillsDict[player]++;
                         }
@@ -93,24 +94,24 @@ namespace ParasiteReplayAnalyzer.Engine
             return playersKillsDict;
         }
 
-        public List<string> GetAlivePlayers(ICollection<DetailsPlayer> detailsPlayers, ICollection<SUnitBornEvent> sUnitBornEvents, List<string> spawns, string? alien)
+        public List<DetailsPlayer> GetAlivePlayers(ICollection<DetailsPlayer> detailsPlayers, ICollection<SUnitBornEvent> sUnitBornEvents, List<DetailsPlayer> spawns, DetailsPlayer? alien)
         {
             var filters = new HashSet<string>(ReadResource("ParasiteReplayAnalyzer.Filters.UnitsThatCountAsPlayerKills.txt"));
             var alienFilters = new HashSet<string>(ReadResource("ParasiteReplayAnalyzer.Filters.HostEvolutions.txt"));
-            var spawnedList = new HashSet<string>();
+            var spawnedList = new HashSet<DetailsPlayer>();
 
-            var alivePlayers = detailsPlayers.Select(player => player.Name).ToList();
+            var alivePlayers = detailsPlayers.Select(player => player).ToList();
 
             foreach (var sUnitBornEvent in sUnitBornEvents.Where(UnitCanBeConsideredKill))
             {
-                var player = ConvertIdToString(sUnitBornEvent.ControlPlayerId - 1, detailsPlayers);
+                var player = ConvertIdToPlayer(sUnitBornEvent.ControlPlayerId - 1, detailsPlayers);
 
                 if (player != null && filters.Contains(sUnitBornEvent.UnitTypeName))
                 {
-                    var isAlien = spawns.Contains(player) || alien == player;
+                    var isAlien = spawns.Any(x => x.Toon.Equals(player.Toon)) || alien == player;
                     var isNotAlien = !spawns.Contains(player) && alien != player;
 
-                    if ((isAlien && alienFilters.Contains(sUnitBornEvent.UnitTypeName)) || spawnedList.Contains(player))
+                    if ((isAlien && alienFilters.Contains(sUnitBornEvent.UnitTypeName)) || spawnedList.Any(x => x.Toon.Equals(x.Toon)))
                     {
                         alivePlayers.Remove(player);
                     }
@@ -129,7 +130,7 @@ namespace ParasiteReplayAnalyzer.Engine
             return alivePlayers;
         }
 
-        public static string GetColorFromPlayer(DetailsPlayer detailsPlayer)
+        public string GetColorFromPlayer(DetailsPlayer detailsPlayer)
         {
             var color = detailsPlayer.Color;
 
@@ -196,58 +197,58 @@ namespace ParasiteReplayAnalyzer.Engine
             return playerDict;
         }
 
-        public Dictionary<string, int> GetLifeTimeList(ICollection<SUnitBornEvent> sUnitBornEvents, ICollection<DetailsPlayer> detailsPlayers, Metadata metadata)
+        public Dictionary<DetailsPlayer, int> GetLifeTimeList(ICollection<SUnitBornEvent> sUnitBornEvents, ICollection<DetailsPlayer> detailsPlayers, Metadata metadata)
         {
-            var lifeTimeDict = new Dictionary<string, int>();
+            var lifeTimeDict = new Dictionary<DetailsPlayer, int>();
             var filters = new HashSet<string>(ReadResource("ParasiteReplayAnalyzer.Filters.UnitsThatCountAsPlayerKills.txt"));
 
             foreach (var player in detailsPlayers)
             {
-                lifeTimeDict.Add(player.Name, metadata?.Duration ?? 0);
+                lifeTimeDict.Add(player, metadata?.Duration ?? 0);
             }
 
             foreach (var sUnitBornEvent in sUnitBornEvents.Where(UnitCanBeConsideredKill))
             {
-                var playerName = ConvertIdToString(sUnitBornEvent.ControlPlayerId - 1, detailsPlayers);
+                var player = ConvertIdToPlayer(sUnitBornEvent.ControlPlayerId - 1, detailsPlayers);
 
-                if (playerName != null && filters.Contains(sUnitBornEvent.UnitTypeName))
+                if (player != null && filters.Contains(sUnitBornEvent.UnitTypeName))
                 {
-                    lifeTimeDict[playerName] = sUnitBornEvent.SUnitDiedEvent!.Gameloop / 16;
+                    lifeTimeDict[player] = sUnitBornEvent.SUnitDiedEvent!.Gameloop / 16;
                 }
             }
 
             return lifeTimeDict;
         }
 
-        public List<string?> GetSpecialRoleTeams(ICollection<DetailsPlayer> players, ICollection<SUpgradeEvent> upgradeEvents)
+        public List<DetailsPlayer?> GetSpecialRoleTeams(ICollection<DetailsPlayer> players, ICollection<SUpgradeEvent> upgradeEvents)
         {
-            return new List<string?>
+            return new List<DetailsPlayer>
             {
                 GetPlayerByUpgrade("AlienIdentificationUpgrade2", upgradeEvents, players),
                 GetPlayerByUpgrade("PlayerIsPsion",upgradeEvents, players),
                 GetPlayerByUpgrade("PlayerisAndroid",upgradeEvents, players),
-                "Station Security",
-                "Alien"
+                new DetailsPlayer(new PlayerColor(999,999,999,999),13,0,"","Alien AI",0,"AI",0,0,new Toon(1,"",0,0), 13),
+                new DetailsPlayer(new PlayerColor(999,999,999,999),13,0,"","Station Security",0,"AI",0,0,new Toon(2,"",0,0), 14)
             };
         }
 
-        public  List<string> GetHumanPlayers(ICollection<DetailsPlayer> players, List<string?> specialRoleTeams)
+        public  List<DetailsPlayer> GetHumanPlayers(ICollection<DetailsPlayer> players, List<DetailsPlayer?> specialRoleTeams)
         {
-            return players.Select(player => player.Name).Where(player => specialRoleTeams.All(specialRole => specialRole != player)).ToList();
+            return players.Select(player => player).Where(player => specialRoleTeams.All(specialRole => specialRole?.Toon != player.Toon)).ToList();
         }
 
-        public string? GetPlayerByUpgrade(string upgradeType, ICollection<SUpgradeEvent> upgradeEvents, ICollection<DetailsPlayer> players)
+        public DetailsPlayer? GetPlayerByUpgrade(string upgradeType, ICollection<SUpgradeEvent> upgradeEvents, ICollection<DetailsPlayer> players)
         {
             var upgradeEvent = upgradeEvents.FirstOrDefault(x => x.UpgradeTypeName.Contains(upgradeType));
 
             if (upgradeEvent != null)
             {
-                return ConvertIdToString(upgradeEvent.PlayerId - 1, players);
+                return ConvertIdToPlayer(upgradeEvent.PlayerId - 1, players);
             }
-            return string.Empty;
+            return null;
         }
 
-        private string GetHandles(DetailsPlayer detailsPlayer)
+        public string GetHandles(DetailsPlayer detailsPlayer)
         {
             var handles = $"{detailsPlayer.Toon.Region}-{detailsPlayer.Toon.ProgramId}-{detailsPlayer.Toon.Realm}-{detailsPlayer.Toon.Id}";
             handles = handles.Replace("\0", "");
@@ -268,7 +269,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
         private bool IsAlienOrStationSecurity(string playerName)
         {
-            return playerName is "Alien" or "Station Security";
+            return playerName is "Alien AI" or "Station Security";
         }
 
         private List<string>? ReadResource(string resourceName)

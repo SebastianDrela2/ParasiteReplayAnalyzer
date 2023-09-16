@@ -23,14 +23,18 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
 
             foreach (var analyzedReplay in analyzedReplays)
             {
-                var json = File.ReadAllText(analyzedReplay);
+                
+                    var json = File.ReadAllText(analyzedReplay);
 
-                var parasiteData = JsonConvert.DeserializeObject<ParasiteData>(json);
+                    if (json.Length > 0)
+                    {
+                        var parasiteData = JsonConvert.DeserializeObject<ParasiteData>(json);
 
-                if (parasiteData != null)
-                {
-                    parasiteDatas.Add(parasiteData);
-                }
+                        if (parasiteData != null)
+                        {
+                            parasiteDatas.Add(parasiteData);
+                        }
+                    }
             }
 
             parasiteDatas.RemoveDuplicates();

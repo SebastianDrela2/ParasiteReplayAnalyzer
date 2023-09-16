@@ -72,7 +72,7 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
         private static PlayerStats CreatePlayerStatsFromParasiteData(ParasiteData parasiteData, KeyValuePair<string, string> kvp)
         {
 
-            var playerData = parasiteData.PlayerDatas.FirstOrDefault(x => x.PlayerName == kvp.Value);
+            var playerData = parasiteData.PlayerDatas.FirstOrDefault(x => x.Handle == kvp.Key);
 
             double playerKills = parasiteData.PlayersKills.FirstOrDefault(x => x.Key == kvp.Value).Value;
             double killedByAnotherPlayerAmmount = !playerData.IsAlive ? 1 : 0;

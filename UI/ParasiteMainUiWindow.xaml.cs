@@ -129,9 +129,13 @@ namespace ParasiteReplayAnalyzer.UI
             var maxConcurrentTasks = 15;
             var semaphore = new SemaphoreSlim(maxConcurrentTasks);
 
+            await Task.Run(async() =>
+            {
+
             var allReplays = _replayFolderDatas.SelectMany(y => y.ReplaysData).Select(x => x.ReplayPath);
             var replayTasks = new List<Task>();
             var completedReplays = 0;
+
             foreach (var replay in allReplays)
             {
                 var analyzedReplayCodePath = FileHelperMethods.GetReplayCodeFromPathWithFile(replay);
@@ -141,7 +145,7 @@ namespace ParasiteReplayAnalyzer.UI
                     continue;
                 }
                 
-                var task = Task.Run(async() =>
+                replayTasks.Add(Task.Run(async() =>
                 {
                     await semaphore.WaitAsync();
 
@@ -151,6 +155,9 @@ namespace ParasiteReplayAnalyzer.UI
                         watch.Start();
 
                         var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
+
+                        await parasiteAnalyzer.LoadParasiteData();
+
                         _settingsManager.SaveParasiteData(parasiteAnalyzer.ParasiteData);
 
                         watch.Stop();
@@ -166,14 +173,18 @@ namespace ParasiteReplayAnalyzer.UI
                     {
                         semaphore.Release();
                     }
-                });
-
-                replayTasks.Add(task);
+                }));
             }
 
             await Task.WhenAll(replayTasks);
 
-            _textBoxResult.Text = $"Finished mass replay analysis... Analyzed {replayTasks.Count} Replays";
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+               
+                _textBoxResult.Text = $"Finished mass replay analysis... Analyzed {replayTasks.Count} Replays";
+            });
+
+            });
         }
 
         private void UpdateTextBoxResult(Action<MassAnalyzeCalculator, StringBuilder> action)

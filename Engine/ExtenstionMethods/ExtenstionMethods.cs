@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Data;
 using ParasiteReplayAnalyzer.Engine.Top500;
+using s2protocol.NET.Models;
 
 namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
 {
@@ -51,6 +52,15 @@ namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
         {
             var multiplier = Math.Pow(10, 2);
             return Math.Ceiling(number * multiplier) / multiplier;
+        }
+
+        public static DetailsPlayer? ChangeAlienIntoAlienAI(this DetailsPlayer? alienAi)
+        {
+            alienAi = new DetailsPlayer(alienAi.Color, alienAi.Control,alienAi.Handicap, alienAi.Hero, "Alien AI",alienAi.Observe,
+                alienAi.Race, alienAi.Result, alienAi.TeamId, new Toon(1,"",0,0), alienAi.WorkingSetSlotId);
+
+            return alienAi;
+
         }
     }
 }

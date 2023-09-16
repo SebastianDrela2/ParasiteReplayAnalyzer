@@ -51,7 +51,7 @@ namespace ParasiteReplayAnalyzer.Testing
                     if (e.SUnitDiedEvent.KillerUnitBornEvent != null && e.ControlPlayerId is > 0 and < 9 && e.UnitTypeName.Contains("Marine"))
                     {
                         writeList.Add(
-                            $"{e.Gameloop} {e.UnitTypeName} {ParasiteMethodHelper.ConvertIdToString(e.ControlPlayerId -1, _replay.Details.Players)} {e.CreatorAbilityName} {e.SUnitDiedEvent.KillerUnitBornEvent.UnitTypeName} {ParasiteMethodHelper.ConvertIdToString(e.SUnitDiedEvent.KillerUnitBornEvent.ControlPlayerId -1, _replay.Details.Players)}");
+                            $"{e.Gameloop} {e.UnitTypeName} {ParasiteMethodHelper.ConvertIdToPlayer(e.ControlPlayerId -1, _replay.Details.Players)} {e.CreatorAbilityName} {e.SUnitDiedEvent.KillerUnitBornEvent.UnitTypeName} {ParasiteMethodHelper.ConvertIdToPlayer(e.SUnitDiedEvent.KillerUnitBornEvent.ControlPlayerId -1, _replay.Details.Players)}");
                     }
                 }
             }
@@ -89,7 +89,7 @@ namespace ParasiteReplayAnalyzer.Testing
 
             foreach (var e in bornEvents)
             {
-                writeList.Add($"{e.Gameloop} {ParasiteMethodHelper.ConvertIdToString(e.ControlPlayerId -1 , _replay.Details.Players)} {e.UnitTypeName}");
+                writeList.Add($"{e.Gameloop} {ParasiteMethodHelper.ConvertIdToPlayer(e.ControlPlayerId -1 , _replay.Details.Players)} {e.UnitTypeName}");
             }
 
             File.WriteAllLines("bornUnits.txt", writeList);
@@ -101,7 +101,7 @@ namespace ParasiteReplayAnalyzer.Testing
 
             foreach (var e in typeChanges)
             {
-                writeList.Add($"{e.Gameloop} {ParasiteMethodHelper.ConvertIdToString(e.PlayerId - 1, _replay.Details.Players)} {e.UnitTypeName}");
+                writeList.Add($"{e.Gameloop} {ParasiteMethodHelper.ConvertIdToPlayer(e.PlayerId - 1, _replay.Details.Players)} {e.UnitTypeName}");
             }
 
             File.WriteAllLines("typeChanges.txt", writeList);
