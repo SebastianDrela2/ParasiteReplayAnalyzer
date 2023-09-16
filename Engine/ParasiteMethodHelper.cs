@@ -26,10 +26,11 @@ namespace ParasiteReplayAnalyzer.Engine
         public List<DetailsPlayer> GetSpawns(ICollection<SUpgradeEvent> upgradeEvents, ICollection<DetailsPlayer> detailsPlayers)
         {
             var spawnList = new List<DetailsPlayer>();
+            var spawnUpgrades = new HashSet<string>();
 
             foreach (var upgradeEvent in upgradeEvents)
             {
-                if (upgradeEvent.UpgradeTypeName.Contains("isaspawn"))
+                if (upgradeEvent.UpgradeTypeName.Contains("isaspawn") && !spawnUpgrades.Contains(upgradeEvent.UpgradeTypeName))
                 {
                     var colorName = upgradeEvent.UpgradeTypeName.Replace("isaspawn", "");
                     var colorRgb = GetPlayerColorFromColorName(colorName);
@@ -40,6 +41,8 @@ namespace ParasiteReplayAnalyzer.Engine
                     {
                         spawnList.Add(player);
                     }
+
+                    spawnUpgrades.Add(upgradeEvent.UpgradeTypeName);
                 }
             }
 
