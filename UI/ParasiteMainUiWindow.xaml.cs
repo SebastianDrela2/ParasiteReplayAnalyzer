@@ -26,6 +26,7 @@ namespace ParasiteReplayAnalyzer.UI
         private SettingsManager _settingsManager;
         private List<ReplayFolderData> _replayFolderDatas = new();
         private List<ParasiteData> _parasiteDatas;
+        private readonly object _lock = new ();
 
         public ParasiteMainUiWindow()
         {
@@ -124,67 +125,112 @@ namespace ParasiteReplayAnalyzer.UI
         private async void OnMassAnalyzeClicked(object sender, RoutedEventArgs e)
         {
             _textBoxResult.Text = "Started mass replay analysis...\n";
-            var files = Directory.GetFiles(_settingsManager.ReplayResultsPath, "*.json", SearchOption.AllDirectories).Select(FileHelperMethods.GetParentDirectoryNameWithFile);
+            var files = Directory.GetFiles(_settingsManager.ReplayResultsPath, "*.json", SearchOption.AllDirectories)
+                .Select(FileHelperMethods.GetParentDirectoryNameWithFile)
+                .ToHashSet();
 
-            var maxConcurrentTasks = 15;
+            var maxConcurrentTasks = 10;
             var semaphore = new SemaphoreSlim(maxConcurrentTasks);
-
-            await Task.Run(async() =>
-            {
+            var watch = new Stopwatch();
 
             var allReplays = _replayFolderDatas.SelectMany(y => y.ReplaysData).Select(x => x.ReplayPath);
             var replayTasks = new List<Task>();
             var completedReplays = 0;
+            var lastUiUpdate = DateTime.Now;
 
-            foreach (var replay in allReplays)
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            try
             {
-                var analyzedReplayCodePath = FileHelperMethods.GetReplayCodeFromPathWithFile(replay);
-
-                if (files.Contains(analyzedReplayCodePath))
+                foreach (var replay in allReplays)
                 {
-                    continue;
-                }
-                
-                replayTasks.Add(Task.Run(async() =>
-                {
-                    await semaphore.WaitAsync();
+                    var analyzedReplayCodePath = FileHelperMethods.GetReplayCodeFromPathWithFile(replay);
 
-                    try
+                    if (files.Contains(analyzedReplayCodePath))
                     {
-                        var watch = new Stopwatch();
-                        watch.Start();
+                        continue;
+                    }
 
-                        var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
-
-                        await parasiteAnalyzer.LoadParasiteData();
-
-                        _settingsManager.SaveParasiteData(parasiteAnalyzer.ParasiteData);
-
-                        watch.Stop();
-
-                        completedReplays++;
-
-                        Application.Current.Dispatcher.Invoke(() =>
+                    replayTasks.Add(AnalyzeReplayAsync(replay, semaphore, cancellationTokenSource.Token)
+                        .ContinueWith(task =>
                         {
-                            _textBoxResult.Text = $"Analyzed {completedReplays}/{replayTasks.Count}";
-                        });
-                    }
-                    finally
-                    {
-                        semaphore.Release();
-                    }
-                }));
+                            lock (_lock)
+                            {
+                                completedReplays++;
+                                watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays, cancellationTokenSource.Token);
+
+                                if (DateTime.Now - lastUiUpdate > TimeSpan.FromSeconds(1))
+                                {
+                                    lastUiUpdate = DateTime.Now;
+                                    Application.Current.Dispatcher.Invoke(() =>
+                                    {
+                                        _textBoxResult.Text = $"Analyzed {completedReplays}/{replayTasks.Count}\n" +
+                                                              $"Estimated time left: {GetEstimatedTimeLeft(replayTasks.Count - completedReplays, watch.ElapsedMilliseconds)}";
+                                    });
+                                }
+                            }
+                        }, cancellationTokenSource.Token));
+                }
+
+                await Task.WhenAll(replayTasks);
+                watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays, cancellationTokenSource.Token);
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _textBoxResult.Text = $"Finished mass replay analysis... Analyzed {replayTasks.Count} Replays";
+                });
             }
+            catch (OperationCanceledException)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _textBoxResult.Text = "Mass replay analysis canceled.";
+                });
+            }
+        }
 
-            await Task.WhenAll(replayTasks);
+        private async Task AnalyzeReplayAsync(string replay, SemaphoreSlim semaphore, CancellationToken cancellationToken)
+        {
+            await semaphore.WaitAsync(cancellationToken);
+            try
+            {
+                var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
+                await parasiteAnalyzer.LoadParasiteData();
+                _settingsManager.SaveParasiteData(parasiteAnalyzer.ParasiteData);
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        }
 
+        private Stopwatch UpdateUiProgress(Stopwatch watch, int ammountOfTasks, int completedReplays, CancellationToken cancellationToken)
+        {
             Application.Current.Dispatcher.Invoke(() =>
             {
-               
-                _textBoxResult.Text = $"Finished mass replay analysis... Analyzed {replayTasks.Count} Replays";
+                lock (_lock)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    if (watch.IsRunning)
+                    {
+                        watch.Stop();
+                    }
+
+                    var leftReplaysToAnalyze = ammountOfTasks - completedReplays;
+                    var estimatedtimeLeft = GetEstimatedTimeLeft(leftReplaysToAnalyze, watch.ElapsedMilliseconds);
+
+                    _textBoxResult.Text = $"Analyzed {completedReplays}/{ammountOfTasks}\n" +
+                                          $"Estimated time left: {estimatedtimeLeft}";
+                    watch = new Stopwatch();
+                    watch.Start();
+                }
             });
 
-            });
+            return watch;
         }
 
         private void UpdateTextBoxResult(Action<MassAnalyzeCalculator, StringBuilder> action)
@@ -327,6 +373,15 @@ namespace ParasiteReplayAnalyzer.UI
         private void OnMenuItemOptionsClicked(object sender, RoutedEventArgs e)
         {
             var settingsWindow = new SettingsUI(_settingsManager, this);
+        }
+
+        private TimeSpan GetEstimatedTimeLeft(int leftReplays, long currentReplayAnalysisTimeInMilliseconds)
+        {
+            var totalExpectedTimeInSeconds = leftReplays * (currentReplayAnalysisTimeInMilliseconds/1000);
+
+            var timeSpan = TimeSpan.FromSeconds(totalExpectedTimeInSeconds);
+
+            return timeSpan;
         }
     }
 }
