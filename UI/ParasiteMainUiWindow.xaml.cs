@@ -257,6 +257,7 @@ namespace ParasiteReplayAnalyzer.UI
             {
                 var bestHosts = calculator.GetBestHosts();
                 var ranking = 1;
+
                 foreach (var host in bestHosts)
                 {
                     sb.Append($"#{ranking} {host.PlayerName} Win: {(host.HostWins / host.HostGames * 100).RoundUpToSecondDigitAfterZero()}% Games: {host.HostGames}\n");
@@ -271,6 +272,7 @@ namespace ParasiteReplayAnalyzer.UI
             {
                 var bestHumans = calculator.GetBestHumans();
                 var ranking = 1;
+
                 foreach (var human in bestHumans)
                 {
                     sb.Append($"#{ranking} {human.PlayerName} Win: {(human.HumanWins / human.HumanGames * 100).RoundUpToSecondDigitAfterZero()}% Games: {human.HumanGames}\n");
@@ -285,6 +287,7 @@ namespace ParasiteReplayAnalyzer.UI
             {
                 var bestKillers = calculator.GetBestKillers();
                 var ranking = 1;
+
                 foreach (var human in bestKillers)
                 {
                     sb.Append($"#{ranking} {human.PlayerName} K/D: {(human.AnotherPlayerKills / human.KillsByAnotherPlayer).RoundUpToSecondDigitAfterZero()} Games: {human.HumanGames}\n");
@@ -299,6 +302,7 @@ namespace ParasiteReplayAnalyzer.UI
             {
                 var bestSelfers = calculator.GetBestSelfers();
                 var ranking = 1;
+
                 foreach (var human in bestSelfers)
                 {
                     sb.Append($"#{ranking} {human.PlayerName} Ratio: {(human.SpawnedAmmount / human.HumanGames).RoundUpToSecondDigitAfterZero()} Games: {human.HumanGames}\n");
@@ -313,6 +317,7 @@ namespace ParasiteReplayAnalyzer.UI
             {
                 var bestAlienSurvivors = calculator.GetBestAlienSurvivors();
                 var ranking = 1;
+
                 foreach (var human in bestAlienSurvivors)
                 {
                     if (human.HostGames != 0)
@@ -320,7 +325,7 @@ namespace ParasiteReplayAnalyzer.UI
                         var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                             .AddSeconds(human.SurvivedTimeAlienPercentages / human.HostGames);
 
-                        sb.Append($"#{ranking} {human.PlayerName} Average Time: {dateTime.Hour}:{dateTime.Minute}:{dateTime.Second} Games: {human.HostGames}\n");
+                        sb.Append($"#{ranking} {human.PlayerName} Rate: {human.SurvivedTimeAlienPercentages / human.HostGames} Games: {human.HostGames}\n");
                         ranking++;
                     }
                 }
@@ -333,14 +338,12 @@ namespace ParasiteReplayAnalyzer.UI
             {
                 var bestHumanSurvivors = calculator.GetBestHumanSurvivors();
                 var ranking = 1;
+                
                 foreach (var human in bestHumanSurvivors)
                 {
                     if (human.HumanGames != 0)
                     {
-                        var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                            .AddSeconds(human.SurviveTimeHumanPercentages / human.HumanGames);
-
-                        sb.Append($"#{ranking} {human.PlayerName} Average Time: {dateTime.Hour}:{dateTime.Minute}:{dateTime.Second} Games: {human.HumanGames}\n");
+                        sb.Append($"#{ranking} {human.PlayerName} Rate: {human.SurviveTimeHumanPercentages / human.HumanGames}% Games: {human.HumanGames}\n");
                         ranking++;
                     }
                 }

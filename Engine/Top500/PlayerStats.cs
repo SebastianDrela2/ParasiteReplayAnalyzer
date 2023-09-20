@@ -25,12 +25,12 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
 
         public double HostWins;
 
-        public double SurvivedTimeAlien;
+        public double SurvivedTimeAlienPercentages;
 
-        public double SurvivedTimeHuman;
+        public double SurviveTimeHumanPercentages;
 
         public PlayerStats(string handles, string playerName, double anotherPlayerKills, double killsByAnotherPlayer, 
-            double spawnedAmmount, double hostGames, double hostWins, double humanGames, double humaneWins, double survivedTimeAlien, double survivedTimeHuman)
+            double spawnedAmmount, double hostGames, double hostWins, double humanGames, double humaneWins, double survivedTimeAlienPercentages, double surviveTimeHumanPercentages)
         {
             Handles = handles;
             PlayerName = playerName;
@@ -41,8 +41,8 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
             HostWins = hostWins;
             HumanGames = humanGames;
             HumanWins = humaneWins;
-            SurvivedTimeAlien = survivedTimeAlien;
-            SurvivedTimeHuman = survivedTimeHuman;
+            SurvivedTimeAlienPercentages = survivedTimeAlienPercentages;
+            SurviveTimeHumanPercentages = surviveTimeHumanPercentages;
         }
 
         public static List<PlayerStats> GetPlayerStats(List<ParasiteData> parasiteDatas)
