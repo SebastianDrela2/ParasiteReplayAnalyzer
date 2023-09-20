@@ -72,9 +72,6 @@ namespace ParasiteReplayAnalyzer.Engine
 
             var gameLength = replay.Metadata?.Duration ?? 0;
 
-            var testingMethod = new TestingMethods(replay);
-            testingMethod.TestOutcome(replay, parasiteMethodHelper);
-
             return new ParasiteData(replayName, replayKey, gameLength, humanPlayers.Select(x => x.Name), specialRoleTeams[2], specialRoleTeams[1],
                 specialRoleTeams[0], playerHandles, playerKills, dictOfLifePercentages, lastEvolution, alivePlayers, spawns, replayPath, players, parasiteMethodHelper);
         }
