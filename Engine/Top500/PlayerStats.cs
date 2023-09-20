@@ -93,8 +93,8 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
             double humanAmmount = playerData is { IsHost: false } ? 1 : 0;
             double humanWins = playerData is { IsHost: false, IsSpawn: false, IsAlive: true } ? 1 : 0;
 
-            double survivedTimeAlien = playerData.IsHost || playerData.IsSpawn ? playerData.LifeDuration : 0;
-            double survivedTimeHuman = playerData is { IsHost: false, IsSpawn: false } ? playerData.LifeDuration : 0;
+            double survivedTimeAlien = playerData.IsHost || playerData.IsSpawn ? playerData.LifeTimePercentage : 0;
+            double survivedTimeHuman = playerData is { IsHost: false, IsSpawn: false } ? playerData.LifeTimePercentage : 0;
 
             return new PlayerStats(
                 kvp.Key, kvp.Value, playerKills,

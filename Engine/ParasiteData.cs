@@ -8,8 +8,6 @@ namespace ParasiteReplayAnalyzer.Engine
 {
     public class ParasiteData
     {
-        private Sc2Replay _replay;
-
         [JsonProperty] 
         public int GameLength;
 
@@ -57,11 +55,9 @@ namespace ParasiteReplayAnalyzer.Engine
 
         }
         public ParasiteData(string replayName, string replayUniqueKey, int gameLength, IEnumerable<string> humanPlayers ,DetailsPlayer? droidPlayer, DetailsPlayer? psionPlayer,
-            DetailsPlayer? alienPlayer, Dictionary<string, string> playerHandles, Dictionary<DetailsPlayer, int> playersKills, Dictionary<DetailsPlayer,int> lifeDurationLists, string lastHostEvolution, List<DetailsPlayer> listOfAlivePlayers
-                , List<DetailsPlayer> spawns, Sc2Replay replay, string fullPath, List<DetailsPlayer> players, ParasiteMethodHelper methodHelper)
+            DetailsPlayer? alienPlayer, Dictionary<string, string> playerHandles, Dictionary<DetailsPlayer, int> playersKills, Dictionary<DetailsPlayer, double> liftDurationPercentagesList, string lastHostEvolution, List<DetailsPlayer> listOfAlivePlayers
+                , List<DetailsPlayer> spawns, string fullPath, List<DetailsPlayer> players, ParasiteMethodHelper methodHelper)
         {
-            _replay = replay;
-            
             ReplayName = replayName;
             ReplayUniqueKey = replayUniqueKey;
             GameLength = gameLength;
@@ -71,26 +67,24 @@ namespace ParasiteReplayAnalyzer.Engine
             AlienPlayer = alienPlayer?.Name;
             AlienSpawns = spawns.Select(x => x.Name).ToList();
             PlayerHandles = playerHandles;
+
             PlayersKills = playersKills.Select(x=> new KeyValuePair<string,int>(methodHelper.GetHandles(x.Key), x.Value))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
             LastHostEvolution = lastHostEvolution;
+
             FullPath = fullPath;
 
-            AddPlayerDatas(listOfAlivePlayers, lifeDurationLists, spawns, alienPlayer, players, methodHelper);
+            AddPlayerDatas(listOfAlivePlayers, liftDurationPercentagesList, spawns, alienPlayer, players, methodHelper);
 
             VictoryStatus = GetMatchStatus();
         }
 
-        private void AddPlayerDatas(List<DetailsPlayer> listOfAlivePlayers, Dictionary<DetailsPlayer, int> lifeDurationLists, List<DetailsPlayer> spawns, DetailsPlayer? host, List<DetailsPlayer> players, ParasiteMethodHelper methodHelper)
+        private void AddPlayerDatas(IReadOnlyCollection<DetailsPlayer> listOfAlivePlayers, IReadOnlyDictionary<DetailsPlayer, int> lifeDurationPercentagesList, IReadOnlyCollection<DetailsPlayer> spawns, DetailsPlayer? host, List<DetailsPlayer> players, ParasiteMethodHelper methodHelper)
         {
-            foreach (var player in players)
+            foreach (var player in players.Where(player => player.Name is not ("Alien AI" or "Station Security")))
             {
-                if (player.Name is "Alien AI" or "Station Security")
-                {
-                    continue;
-                }
+                lifeDurationPercentagesList.TryGetValue(player, out var lifeDuration);
 
-                lifeDurationLists.TryGetValue(player, out var lifeDuration);
                 PlayerDatas.Add( new PlayerData(player, listOfAlivePlayers, spawns, host, lifeDuration, methodHelper));
             }
         }

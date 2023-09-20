@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,7 +7,6 @@ using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using ParasiteReplayAnalyzer.Testing;
 using s2protocol.NET;
 using s2protocol.NET.Models;
-using static IronPython.Modules.PythonIterTools;
 
 namespace ParasiteReplayAnalyzer.Engine
 {
@@ -70,7 +68,7 @@ namespace ParasiteReplayAnalyzer.Engine
             var playerKills = parasiteMethodHelper.GetPlayerKills(players, replay.TrackerEvents.SUnitBornEvents);
 
             var alivePlayers = parasiteMethodHelper.GetAlivePlayers(players, replay.TrackerEvents.SUnitBornEvents, spawns, specialRoleTeams[0]);
-            var dictionaryOfLives = parasiteMethodHelper.GetLifeTimeList(replay.TrackerEvents.SUnitBornEvents, players, replay.Metadata);
+            var dictOfLifePercentages = parasiteMethodHelper.GetLifeTimePercentagesList(replay.TrackerEvents.SUnitBornEvents, players, replay.Metadata);
 
             var gameLength = replay.Metadata?.Duration ?? 0;
 
@@ -78,7 +76,7 @@ namespace ParasiteReplayAnalyzer.Engine
             testingMethod.TestOutcome(replay, parasiteMethodHelper);
 
             return new ParasiteData(replayName, replayKey, gameLength, humanPlayers.Select(x => x.Name), specialRoleTeams[2], specialRoleTeams[1],
-                specialRoleTeams[0], playerHandles, playerKills, dictionaryOfLives, lastEvolution, alivePlayers, spawns, replay, replayPath, players, parasiteMethodHelper);
+                specialRoleTeams[0], playerHandles, playerKills, dictOfLifePercentages, lastEvolution, alivePlayers, spawns, replayPath, players, parasiteMethodHelper);
         }
 
         private string GetReplayKey(IEnumerable<DetailsPlayer> detailsPlayers)

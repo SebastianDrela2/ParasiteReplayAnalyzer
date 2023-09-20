@@ -203,9 +203,9 @@ namespace ParasiteReplayAnalyzer.Engine
             return playerDict;
         }
 
-        public Dictionary<DetailsPlayer, int> GetLifeTimeList(ICollection<SUnitBornEvent> sUnitBornEvents, ICollection<DetailsPlayer> detailsPlayers, Metadata metadata)
+        public Dictionary<DetailsPlayer, double> GetLifeTimePercentagesList(ICollection<SUnitBornEvent> sUnitBornEvents, ICollection<DetailsPlayer> detailsPlayers, Metadata metadata)
         {
-            var lifeTimeDict = new Dictionary<DetailsPlayer, int>();
+            var lifeTimeDict = new Dictionary<DetailsPlayer, double>();
             var filters = new HashSet<string>(ReadResource("ParasiteReplayAnalyzer.Filters.UnitsThatCountAsPlayerKills.txt"));
 
             foreach (var player in detailsPlayers)
@@ -219,13 +219,27 @@ namespace ParasiteReplayAnalyzer.Engine
 
                 if (player != null && filters.Contains(sUnitBornEvent.UnitTypeName))
                 {
-                    lifeTimeDict[player] = sUnitBornEvent.SUnitDiedEvent!.Gameloop / 16;
+                    lifeTimeDict[player] = GetLifePercentage(sUnitBornEvent.SUnitDiedEvent!.Gameloop, metadata);
                 }
             }
 
             return lifeTimeDict;
         }
 
+        private double GetLifePercentage(double gameLoop, Metadata? metadata)
+        {
+            var seconds = gameLoop / 16;
+            var matchLength = metadata?.Duration ?? 0;
+
+            if (matchLength.Equals(0))
+            {
+                return 0;
+            }
+
+            var lifeTimeInPercentages = (seconds / matchLength) * 100;
+
+            return lifeTimeInPercentages;
+        }
         public List<DetailsPlayer?> GetSpecialRoleTeams(ICollection<DetailsPlayer> players, ICollection<SUpgradeEvent> upgradeEvents)
         {
             return new List<DetailsPlayer?>
