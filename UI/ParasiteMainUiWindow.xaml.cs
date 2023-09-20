@@ -318,7 +318,7 @@ namespace ParasiteReplayAnalyzer.UI
                     if (human.HostGames != 0)
                     {
                         var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                            .AddSeconds(human.SurvivedTimeAlien / human.HostGames);
+                            .AddSeconds(human.SurvivedTimeAlienPercentages / human.HostGames);
 
                         sb.Append($"#{ranking} {human.PlayerName} Average Time: {dateTime.Hour}:{dateTime.Minute}:{dateTime.Second} Games: {human.HostGames}\n");
                         ranking++;
@@ -338,7 +338,7 @@ namespace ParasiteReplayAnalyzer.UI
                     if (human.HumanGames != 0)
                     {
                         var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                            .AddSeconds(human.SurvivedTimeHuman / human.HumanGames);
+                            .AddSeconds(human.SurviveTimeHumanPercentages / human.HumanGames);
 
                         sb.Append($"#{ranking} {human.PlayerName} Average Time: {dateTime.Hour}:{dateTime.Minute}:{dateTime.Second} Games: {human.HumanGames}\n");
                         ranking++;

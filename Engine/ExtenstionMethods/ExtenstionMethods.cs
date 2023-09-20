@@ -29,12 +29,7 @@ namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
 
         public static void UpdatePlayerStats(this List<PlayerStats> listOfPlayerStats, PlayerStats incomingPlayerStats, KeyValuePair<string, string> kvp)
         {
-            var existingPlayerStats = listOfPlayerStats.FirstOrDefault(x => x.Handles == kvp.Key);
-
-            if (existingPlayerStats == null)
-            {
-                return;
-            }
+            var existingPlayerStats = listOfPlayerStats.First(x => x.Handles == kvp.Key);
 
             existingPlayerStats.AnotherPlayerKills += incomingPlayerStats.AnotherPlayerKills;
             existingPlayerStats.KillsByAnotherPlayer += incomingPlayerStats.KillsByAnotherPlayer;
@@ -43,8 +38,8 @@ namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
             existingPlayerStats.HumanGames += incomingPlayerStats.HumanGames;
             existingPlayerStats.HumanWins += incomingPlayerStats.HumanWins;
             existingPlayerStats.SpawnedAmmount += incomingPlayerStats.SpawnedAmmount;
-            existingPlayerStats.SurvivedTimeHuman += incomingPlayerStats.SurvivedTimeHuman;
-            existingPlayerStats.SurvivedTimeAlien += incomingPlayerStats.SurvivedTimeAlien;
+            existingPlayerStats.SurviveTimeHumanPercentages += incomingPlayerStats.SurviveTimeHumanPercentages;
+            existingPlayerStats.SurvivedTimeAlienPercentages += incomingPlayerStats.SurvivedTimeAlienPercentages;
 
             var index = listOfPlayerStats.IndexOf(existingPlayerStats);
             listOfPlayerStats[index] = existingPlayerStats;

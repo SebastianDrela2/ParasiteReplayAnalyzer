@@ -79,13 +79,13 @@ namespace ParasiteReplayAnalyzer.Engine
             VictoryStatus = GetMatchStatus();
         }
 
-        private void AddPlayerDatas(IReadOnlyCollection<DetailsPlayer> listOfAlivePlayers, IReadOnlyDictionary<DetailsPlayer, int> lifeDurationPercentagesList, IReadOnlyCollection<DetailsPlayer> spawns, DetailsPlayer? host, List<DetailsPlayer> players, ParasiteMethodHelper methodHelper)
+        private void AddPlayerDatas(IReadOnlyCollection<DetailsPlayer> listOfAlivePlayers, IReadOnlyDictionary<DetailsPlayer, double> lifeDurationPercentagesList, IReadOnlyCollection<DetailsPlayer> spawns, DetailsPlayer? host, IEnumerable<DetailsPlayer> players, ParasiteMethodHelper methodHelper)
         {
             foreach (var player in players.Where(player => player.Name is not ("Alien AI" or "Station Security")))
             {
-                lifeDurationPercentagesList.TryGetValue(player, out var lifeDuration);
+                lifeDurationPercentagesList.TryGetValue(player, out var lifeDurationPercentage);
 
-                PlayerDatas.Add( new PlayerData(player, listOfAlivePlayers, spawns, host, lifeDuration, methodHelper));
+                PlayerDatas.Add( new PlayerData(player, listOfAlivePlayers, spawns, host, lifeDurationPercentage, methodHelper));
             }
         }
 

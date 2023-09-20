@@ -210,7 +210,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
             foreach (var player in detailsPlayers)
             {
-                lifeTimeDict.Add(player, metadata?.Duration ?? 0);
+                lifeTimeDict.Add(player, 100);
             }
 
             foreach (var sUnitBornEvent in sUnitBornEvents.Where(UnitCanBeConsideredKill))

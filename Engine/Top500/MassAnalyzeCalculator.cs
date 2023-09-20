@@ -81,7 +81,7 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
         {
             var bestAlienSurvivors = _playerStats.Where(x => x.HostGames > 10)
                 .OrderByDescending(x =>
-                    x.SurvivedTimeAlien == 0 || x.HumanGames == 0 ? 0.0 : (x.SurvivedTimeAlien / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
+                    (x.SurvivedTimeAlienPercentages / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
 
             return bestAlienSurvivors;
         }
@@ -90,7 +90,7 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
         {
             var bestHumanSurvivors = _playerStats.Where(x => x.HumanGames > 20)
                 .OrderByDescending(x =>
-                    x.SurvivedTimeHuman == 0 || x.HumanGames == 0 ? 0.0 : (x.SurvivedTimeHuman / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
+                    (x.SurviveTimeHumanPercentages / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
 
             return bestHumanSurvivors;
         }
