@@ -11,7 +11,7 @@ namespace ParasiteReplayAnalyzer.Saving
 {
     public class SettingsManager
     {
-        public Settings Settings => LoadSettings();
+        public Settings? Settings => LoadSettings();
         public string ReplayResultsPath => ReplayFolderData.GetReplayResultsPath();
 
         public string SettingsPath => GetDefaultSettingsPath();
@@ -22,10 +22,10 @@ namespace ParasiteReplayAnalyzer.Saving
             return JsonConvert.DeserializeObject<Settings>(json);
         }
 
-        public void SaveSettings(string replaysPath)
+        public void SaveSettings(string replaysPath, int maxConcurrentTasks = 10)
         {
             var settings =
-                new Settings(replaysPath);
+                new Settings(replaysPath, maxConcurrentTasks);
 
             var parentDirectory = Directory.GetParent(SettingsPath).FullName;
 

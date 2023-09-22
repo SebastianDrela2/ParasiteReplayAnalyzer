@@ -45,9 +45,7 @@ namespace ParasiteReplayAnalyzer.UI
             }
             else
             {
-                var defaultReplaysPath = _settingsManager.GetDefaultReplaysPath();
-
-                _settingsManager.SaveSettings(defaultReplaysPath);
+                _settingsManager.SaveSettings(_settingsManager.Settings.Sc2ReplayDirectoryPath, _settingsManager.Settings.MaxConcurrentAnalyzeTasks);
                 _settingsManager.LoadSettings();
             }
         }
