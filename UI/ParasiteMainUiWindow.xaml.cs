@@ -322,7 +322,7 @@ namespace ParasiteReplayAnalyzer.UI
                 {
                     if (human.HostGames != 0)
                     {
-                        sb.Append($"#{ranking} {human.PlayerName} Rate: {human.SurvivedTimeAlienPercentages / human.HostGames}% Games: {human.HostGames}\n");
+                        sb.Append($"#{ranking} ({human.Handles}) {human.PlayerName} Rate: {human.SurvivedTimeAlienPercentages / human.HostGames}% Games: {human.HostGames}\n");
                         ranking++;
                     }
                 }
@@ -340,7 +340,7 @@ namespace ParasiteReplayAnalyzer.UI
                 {
                     if (human.HumanGames != 0)
                     {
-                        sb.Append($"#{ranking} {human.PlayerName} Rate: {human.SurviveTimeHumanPercentages / human.HumanGames}% Games: {human.HumanGames}\n");
+                        sb.Append($"#{ranking} ({human.Handles}) {human.PlayerName} Rate: {human.SurviveTimeHumanPercentages / human.HumanGames}% Games: {human.HumanGames}\n");
                         ranking++;
                     }
                 }
