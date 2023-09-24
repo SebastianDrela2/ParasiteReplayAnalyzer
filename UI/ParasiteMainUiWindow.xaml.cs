@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using IronPython.Modules;
+using Microsoft.Win32;
 using ParasiteReplayAnalyzer.Engine;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using ParasiteReplayAnalyzer.Engine.FileHelpers;
@@ -363,6 +364,26 @@ namespace ParasiteReplayAnalyzer.UI
         private void OnMenuItemOptionsClicked(object sender, RoutedEventArgs e)
         {
             var settingsWindow = new SettingsUI(_settingsManager, this);
+        }
+
+        private async void OnMenuAnalyzeClicked(object sender, RoutedEventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog();
+           
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Task.Run(async () =>
+                {
+                    var replayPath = openFileDialog.FileName;
+
+                    var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
+
+                    await parasiteAnalyzer.LoadParasiteData();
+
+                    await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
+                });
+                
+            }
         }
 
         private TimeSpan GetEstimatedTimeLeft(int leftReplays, long currentReplayAnalysisTimeInMilliseconds)

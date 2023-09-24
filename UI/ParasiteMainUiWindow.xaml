@@ -9,6 +9,9 @@
     <StackPanel>
         <Grid>
             <Menu>
+                <MenuItem Header="File" Width="50">
+                    <MenuItem Header="Analyze" Click="OnMenuAnalyzeClicked"/>
+                </MenuItem>
                 <MenuItem Header="Actions" Width="50">
                     <MenuItem x:Name ="_winRate" Header ="Human And Alien WinRate" Click="OnWinRateClicked"/>
                     <MenuItem x:Name="_bestHosts" Header="Best Hosts" Click="OnBestHostsClicked"/>
