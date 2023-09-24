@@ -369,21 +369,16 @@ namespace ParasiteReplayAnalyzer.UI
         private async void OnMenuAnalyzeClicked(object sender, RoutedEventArgs e)
         {
             var openFileDialog = new OpenFileDialog();
-           
+
             if (openFileDialog.ShowDialog() == true)
             {
-                Task.Run(async () =>
-                {
-                    var replayPath = openFileDialog.FileName;
+                var replayPath = openFileDialog.FileName;
+                var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
 
-                    var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
-
-                    await parasiteAnalyzer.LoadParasiteData();
-
-                    await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
-                });
-                
+                await parasiteAnalyzer.LoadParasiteData();
+                await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
             }
+
         }
 
         private TimeSpan GetEstimatedTimeLeft(int leftReplays, long currentReplayAnalysisTimeInMilliseconds)
