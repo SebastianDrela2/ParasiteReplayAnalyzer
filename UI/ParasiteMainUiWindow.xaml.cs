@@ -99,7 +99,7 @@ namespace ParasiteReplayAnalyzer.UI
 
                 if (selectedItem != null)
                 {
-                    Task.Run(async() =>
+                    _ = Task.Run(async () =>
                     {
                         var watch = new Stopwatch();
                         watch.Start();
@@ -116,7 +116,7 @@ namespace ParasiteReplayAnalyzer.UI
                         {
                             _textBoxResult.Text += $"Analyzed: {parasiteAnalyzer.ParasiteData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
                         });
-                        
+
                     }).ConfigureAwait(true);
                 }
             }
