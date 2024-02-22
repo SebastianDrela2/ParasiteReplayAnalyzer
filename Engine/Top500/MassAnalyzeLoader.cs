@@ -19,11 +19,12 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
         {
             var parasiteDatas = new List<ParasiteData>();
 
-            var analyzedReplays = Directory.GetFiles(ReplaysPath, "*.json", SearchOption.AllDirectories);
-
-            foreach (var analyzedReplay in analyzedReplays)
+            if (File.Exists(ReplaysPath))
             {
-                
+                var analyzedReplays = Directory.GetFiles(ReplaysPath, "*.json", SearchOption.AllDirectories);
+
+                foreach (var analyzedReplay in analyzedReplays)
+                {
                     var json = File.ReadAllText(analyzedReplay);
 
                     if (json.Length > 0)
@@ -35,11 +36,14 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
                             parasiteDatas.Add(parasiteData);
                         }
                     }
+                }
+
+                parasiteDatas.RemoveDuplicates();
+
+                return parasiteDatas;
             }
 
-            parasiteDatas.RemoveDuplicates();
-
-            return parasiteDatas;
+            return new List<ParasiteData>();
         }
     }
 }

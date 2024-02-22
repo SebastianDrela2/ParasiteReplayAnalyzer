@@ -18,6 +18,11 @@ namespace ParasiteReplayAnalyzer.Saving
 
         public Settings? LoadSettings()
         {
+            if (!File.Exists(SettingsPath))
+            {
+                return new Settings(GetDefaultReplaysPath(), 10);
+            }
+
             var json = File.ReadAllText(SettingsPath);
             return JsonConvert.DeserializeObject<Settings>(json);
         }
@@ -27,7 +32,7 @@ namespace ParasiteReplayAnalyzer.Saving
             var settings =
                 new Settings(replaysPath, maxConcurrentTasks);
 
-            var parentDirectory = Directory.GetParent(SettingsPath).FullName;
+            var parentDirectory = Directory.GetParent(SettingsPath)!.FullName;
 
             if (!Directory.Exists(parentDirectory))
             {
@@ -37,19 +42,6 @@ namespace ParasiteReplayAnalyzer.Saving
             var json = JsonConvert.SerializeObject(settings);
 
             File.WriteAllText(SettingsPath , json);
-        }
-
-        public void SaveParasiteData(ParasiteData data)
-        {
-            var json = JsonConvert.SerializeObject(data, Formatting.Indented);
-
-            var directory = FileHelperMethods.ExtractFirstCharacters(data.FullPath);
-            var directoryPath = Path.Combine(ReplayResultsPath, directory);
-
-            Directory.CreateDirectory(directoryPath);
-
-            var filePath = Path.Combine(directoryPath, $"{data.ReplayName}.json");
-            File.WriteAllText(filePath, json);
         }
 
         public async Task SaveParasiteDataAsync(ParasiteData data)
