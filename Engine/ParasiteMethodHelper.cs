@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using IronPython.Modules;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ParasiteReplayAnalyzer.Engine
 {

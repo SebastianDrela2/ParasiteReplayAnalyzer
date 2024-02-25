@@ -10,6 +10,7 @@ namespace ParasiteReplayAnalyzer.UI
     {
         private SettingsManager _settingsManager;
         private ParasiteMainUiWindow _mainUiWindow;
+
         public SettingsUI(SettingsManager settingsManager, ParasiteMainUiWindow mainUiWindow)
         {
             InitializeComponent();
