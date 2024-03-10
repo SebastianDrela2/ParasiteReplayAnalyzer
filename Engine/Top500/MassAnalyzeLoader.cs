@@ -19,7 +19,7 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
         {
             var parasiteDatas = new List<ParasiteData>();
 
-            if (File.Exists(ReplaysPath))
+            if (Directory.Exists(ReplaysPath))
             {
                 var analyzedReplays = Directory.GetFiles(ReplaysPath, "*.json", SearchOption.AllDirectories);
 

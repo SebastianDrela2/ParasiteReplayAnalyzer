@@ -59,7 +59,7 @@ namespace ParasiteReplayAnalyzer.UI
         {
             _listBoxReplays.Items.Clear();
 
-            if (File.Exists(_settingsManager.Settings.Sc2ReplayDirectoryPath))
+            if (Directory.Exists(_settingsManager.Settings.Sc2ReplayDirectoryPath))
             {
                 var allFileNames = Directory.GetFiles(_settingsManager.Settings.Sc2ReplayDirectoryPath, "*.Sc2Replay",
                     SearchOption.AllDirectories);
@@ -128,6 +128,12 @@ namespace ParasiteReplayAnalyzer.UI
         private async void OnMassAnalyzeClickedAsync(object sender, RoutedEventArgs e)
         {
             _textBoxResult.Text = "Started mass replay analysis...\n";
+
+            if (!Directory.Exists(_settingsManager.ReplayResultsPath))
+            {
+                Directory.CreateDirectory(_settingsManager.ReplayResultsPath);
+            }
+
             var files = Directory.GetFiles(_settingsManager.ReplayResultsPath, "*.json", SearchOption.AllDirectories)
                 .Select(FileHelperMethods.GetParentDirectoryNameWithFile)
                 .ToHashSet();
