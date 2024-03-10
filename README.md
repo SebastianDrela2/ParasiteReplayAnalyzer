@@ -12,7 +12,4 @@
 
 ## Media
 
-![obraz](https://github.com/SebastianDrela2/ParasiteReplayAnalyzer/assets/107455395/ac21ca52-72a6-467e-ae0d-d8f81c73d1e9)
-
-![obraz](https://github.com/SebastianDrela2/ParasiteReplayAnalyzer/assets/107455395/c896caf5-0767-4704-81a7-440d6ddc9be3)
-
+![parasiteshowoff](https://github.com/SebastianDrela2/ParasiteReplayAnalyzer/assets/107455395/b31f4430-2284-45e7-9b8e-05202a04745c)
