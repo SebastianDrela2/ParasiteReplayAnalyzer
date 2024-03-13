@@ -7,7 +7,6 @@ namespace ParasiteReplayAnalyzer.Engine
     {
         public string ReplayName { get; }
         public string ReplayPath { get; }
-
         public string ReplayKey { get; }
         public int GameLength { get; }
         public List<DetailsPlayer> Players { get; }
