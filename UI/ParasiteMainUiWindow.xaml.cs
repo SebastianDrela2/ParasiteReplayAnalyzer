@@ -161,7 +161,7 @@ namespace ParasiteReplayAnalyzer.UI
                         }
 
                         replayTasks.Add(AnalyzeReplayAsync(replay, semaphore, cancellationTokenSource.Token)
-                            .ContinueWith(async task =>
+                            .ContinueWith(task =>
                             {
                                 completedReplays++;
                                 watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays,
@@ -372,7 +372,7 @@ namespace ParasiteReplayAnalyzer.UI
 
         private void OnMenuItemOptionsClicked(object sender, RoutedEventArgs e)
         {
-            var settingsWindow = new SettingsUI(_settingsManager, this);
+            _ = new SettingsUI(_settingsManager, this);
         }
 
         private async void OnMenuAnalyzeClicked(object sender, RoutedEventArgs e)
@@ -385,7 +385,7 @@ namespace ParasiteReplayAnalyzer.UI
                 var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
 
                 await parasiteAnalyzer.LoadParasiteData();
-                await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
+                await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData!);
             }
 
         }
