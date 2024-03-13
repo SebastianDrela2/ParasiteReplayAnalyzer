@@ -13,10 +13,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
         [JsonProperty]
         public GameData GameData;
-     
-        [JsonProperty]
-        public List<string> SpecialRoleTeamNames;
-
+           
         [JsonProperty]
         public Dictionary<string, int> PlayersKills;
 
@@ -34,9 +31,7 @@ namespace ParasiteReplayAnalyzer.Engine
         {
             GameMetaData = gameMetaData;
             GameData = gameData;
-
-            SpecialRoleTeamNames = gameData.SpecialRoleTeams.Select(x => x.Name).ToList();                     
-
+                               
             PlayersKills = gameData.PlayerKills.Select(x=> new KeyValuePair<string,int>(methodHelper.GetHandles(x.Key), x.Value))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
                    
