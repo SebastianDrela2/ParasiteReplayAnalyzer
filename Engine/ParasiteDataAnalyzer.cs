@@ -30,7 +30,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
             if (sc2Replay != null)
             {
-                ParasiteData = await Task.Run(() => GetParasiteData(sc2Replay, _parasiteReplayPath));
+                ParasiteData = await Task.Run(() => GetParasiteData(sc2Replay));
             }
         }
 
@@ -46,7 +46,7 @@ namespace ParasiteReplayAnalyzer.Engine
             return null;
         }
 
-        private ParasiteData GetParasiteData(Sc2Replay replay, string replayPath)
+        private ParasiteData GetParasiteData(Sc2Replay replay)
         {
             var parasiteMethodHelper = new ParasiteMethodHelper();
             var replayName = Path.GetFileNameWithoutExtension(replay.FileName);
@@ -72,7 +72,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
             var gameLength = replay.Metadata?.Duration ?? 0;
 
-            var gameMetaData = new GameMetaData(replayName, replayPath, replayKey, gameLength, players, playerHandles);
+            var gameMetaData = new GameMetaData(replayName, _parasiteReplayPath, replayKey, gameLength, players, playerHandles);
             var gameData = new GameData(humanPlayerNames, specialRoleTeams, playerKills, dictOfLifePercentages, lastEvolution, alivePlayers, spawns);
 
             return new ParasiteData(gameMetaData, gameData, parasiteMethodHelper);
