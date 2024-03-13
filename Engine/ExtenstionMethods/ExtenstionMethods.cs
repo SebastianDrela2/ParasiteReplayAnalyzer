@@ -11,18 +11,17 @@ namespace ParasiteReplayAnalyzer.Engine.ExtenstionMethods
         public static void RemoveDuplicates(this List<ParasiteData> parasiteDatas)
         {
             var duplicateData = parasiteDatas
-                .GroupBy(group => group.ReplayUniqueKey)
+                .GroupBy(group => group.GameMetaData.ReplayKey)
                 .Where(x => x.Count() > 1)
                 .SelectMany(x => x)
                 .ToList();
 
             var bestGameData = duplicateData
-                .GroupBy(x => x.ReplayUniqueKey)
-                .Select(group => group.OrderByDescending(item => item.GameLength).First())
+                .GroupBy(x => x.GameMetaData.ReplayKey)
+                .Select(group => group.OrderByDescending(item => item.GameMetaData.GameLength).First())
                 .ToList();
 
             parasiteDatas.RemoveAll(duplicateData.Contains);
-
             parasiteDatas.AddRange(bestGameData);
         }
 

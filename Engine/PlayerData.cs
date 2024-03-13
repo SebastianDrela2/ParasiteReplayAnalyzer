@@ -32,12 +32,12 @@ namespace ParasiteReplayAnalyzer.Engine
         {
 
         }
-        public PlayerData(DetailsPlayer detailsPlayer, IEnumerable<DetailsPlayer> listOfAlivePlayers, IEnumerable<DetailsPlayer> spawns, DetailsPlayer host, double lifeTimePercentage, ParasiteMethodHelper methodHelper)
+        public PlayerData(GameData gameData, DetailsPlayer detailsPlayer, ParasiteMethodHelper methodHelper, double lifeTimePercentage)
         {
             PlayerName = detailsPlayer.Name;
-            IsHost = host.Toon.Equals(detailsPlayer.Toon);
-            IsSpawn = spawns.Any(x => x.Toon.Equals(detailsPlayer.Toon));
-            IsAlive = listOfAlivePlayers.Any(x => x.Toon.Equals(detailsPlayer.Toon));
+            IsHost = gameData.SpecialRoleTeams[2]!.Toon.Equals(detailsPlayer.Toon);
+            IsSpawn = gameData.Spawns.Any(x => x.Toon.Equals(detailsPlayer.Toon));
+            IsAlive = gameData.AlivePlayers.Any(x => x.Toon.Equals(detailsPlayer.Toon));
             LifeTimePercentage = lifeTimePercentage;
             PlayerColor = methodHelper.GetColorFromPlayer(detailsPlayer);
             Handle = methodHelper.GetHandles(detailsPlayer);

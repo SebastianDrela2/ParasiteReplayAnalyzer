@@ -48,12 +48,12 @@ namespace ParasiteReplayAnalyzer.Saving
         {
             var json = JsonConvert.SerializeObject(data, Formatting.Indented);
 
-            var directory = FileHelperMethods.ExtractFirstCharacters(data.FullPath);
+            var directory = FileHelperMethods.ExtractFirstCharacters(data.GameMetaData.ReplayPath);
             var directoryPath = Path.Combine(ReplayResultsPath, directory);
 
             Directory.CreateDirectory(directoryPath);
 
-            var filePath = Path.Combine(directoryPath, $"{data.ReplayName}.json");
+            var filePath = Path.Combine(directoryPath, $"{data.GameMetaData.ReplayName}.json");
 
             await using var writer = new StreamWriter(filePath);
             await writer.WriteAsync(json);

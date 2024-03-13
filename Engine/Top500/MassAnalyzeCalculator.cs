@@ -98,7 +98,7 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
         public List<AlienForm> GetBestAlienForms()
         {
             var orderedEvolutions = _parasiteDatas
-                .GroupBy(x => x.LastHostEvolution)
+                .GroupBy(x => x.GameData.LastHostEvolution)
                 .Select(group =>
                 {
                     var totalGames = group.Count();

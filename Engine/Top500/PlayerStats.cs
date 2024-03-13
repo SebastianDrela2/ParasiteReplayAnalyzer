@@ -59,7 +59,7 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
 
             foreach (var parasiteData in parasiteDatas)
             {
-                foreach (var handlesKvp in parasiteData.PlayerHandles.Where(x => !handlesExclusionList.Contains(x.Key)))
+                foreach (var handlesKvp in parasiteData.GameMetaData.PlayerHandles.Where(x => !handlesExclusionList.Contains(x.Key)))
                 {
 
                     var playerStats = CreatePlayerStatsFromParasiteData(parasiteData, handlesKvp);

@@ -117,7 +117,7 @@ namespace ParasiteReplayAnalyzer.UI
 
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            _textBoxResult.Text += $"Analyzed: {parasiteAnalyzer.ParasiteData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
+                            _textBoxResult.Text += $"Analyzed: {parasiteAnalyzer.ParasiteData.GameMetaData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
                         });
 
                     }).ConfigureAwait(true);

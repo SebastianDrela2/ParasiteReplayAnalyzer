@@ -62,7 +62,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
             var spawns = parasiteMethodHelper.GetSpawns(upgradeEvents, players);
             var specialRoleTeams = parasiteMethodHelper.GetSpecialRoleTeams(players, upgradeEvents);
-            var humanPlayers = parasiteMethodHelper.GetHumanPlayers(players, specialRoleTeams);
+            var humanPlayerNames = parasiteMethodHelper.GetHumanPlayers(players, specialRoleTeams).Select(x => x.Name);
 
             var lastEvolution = parasiteMethodHelper.GetLastHostEvolution(replay.TrackerEvents.SUnitBornEvents);
             var playerKills = parasiteMethodHelper.GetPlayerKills(players, replay.TrackerEvents.SUnitBornEvents);
@@ -72,8 +72,10 @@ namespace ParasiteReplayAnalyzer.Engine
 
             var gameLength = replay.Metadata?.Duration ?? 0;
 
-            return new ParasiteData(replayName, replayKey, gameLength, humanPlayers.Select(x => x.Name), specialRoleTeams[2], specialRoleTeams[1],
-                specialRoleTeams[0], playerHandles, playerKills, dictOfLifePercentages, lastEvolution, alivePlayers, spawns, replayPath, players, parasiteMethodHelper);
+            var gameMetaData = new GameMetaData(replayName, replayPath, replayKey, gameLength, players, playerHandles);
+            var gameData = new GameData(humanPlayerNames, specialRoleTeams, playerKills, dictOfLifePercentages, lastEvolution, alivePlayers, spawns);
+
+            return new ParasiteData(gameMetaData, gameData, parasiteMethodHelper);
         }
 
         private string GetReplayKey(IEnumerable<DetailsPlayer> detailsPlayers)
