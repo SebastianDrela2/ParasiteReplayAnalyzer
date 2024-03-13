@@ -58,6 +58,7 @@ namespace ParasiteReplayAnalyzer.UI
         public void FillListBoxItems()
         {
             _listBoxReplays.Items.Clear();
+            _replayFolderDatas.Clear();
 
             if (Directory.Exists(_settingsManager.Settings.Sc2ReplayDirectoryPath))
             {
