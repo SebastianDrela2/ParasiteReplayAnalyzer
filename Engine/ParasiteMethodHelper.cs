@@ -48,7 +48,7 @@ namespace ParasiteReplayAnalyzer.Engine
         }
 
         public ICollection<SUpgradeEvent> FilterUpgradeEvents(ICollection<SUpgradeEvent> upgradeEvents)
-        {
+        {            
             var filters = ReadResource("ParasiteReplayAnalyzer.Filters.UpgradeEventsFilters.txt");
 
             ICollection<SUpgradeEvent> newUpgradeEvents = new List<SUpgradeEvent>();

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Input;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 
 namespace ParasiteReplayAnalyzer.Engine.Top500
@@ -61,7 +60,6 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
             {
                 foreach (var handlesKvp in parasiteData.GameMetaData.PlayerHandles.Where(x => !handlesExclusionList.Contains(x.Key)))
                 {
-
                     var playerStats = CreatePlayerStatsFromParasiteData(parasiteData, handlesKvp);
 
                     if (listOfPlayerStats.All(x => x.Handles != handlesKvp.Key))
