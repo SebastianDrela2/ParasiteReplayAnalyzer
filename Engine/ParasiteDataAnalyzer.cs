@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using s2protocol.NET;
 using s2protocol.NET.Models;
-using static IronPython.Modules.PythonIterTools;
 
 namespace ParasiteReplayAnalyzer.Engine
 {
