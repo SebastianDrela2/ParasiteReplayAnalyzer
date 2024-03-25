@@ -76,13 +76,13 @@ namespace ParasiteReplayAnalyzer.UI
                 var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
                 var replayDisplay = $"{replayFolderCode}/{fileName}";
 
-                SetFolderData(fileName, path, replayFolderCode);
+                SetReplayFolderData(fileName, path, replayFolderCode);
 
                 _listBoxReplays.Items.Add(replayDisplay);
             }
         }
 
-        private void SetFolderData(string fileName, string path, string replayFolderCode)
+        private void SetReplayFolderData(string fileName, string path, string replayFolderCode)
         {
             if (!_replayFolderDatas.Any(x => x.ReplayFolderCode.Equals(replayFolderCode)))
             {
