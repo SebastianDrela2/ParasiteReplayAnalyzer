@@ -25,8 +25,7 @@ namespace ParasiteReplayAnalyzer.UI
         private MassAnalyzeLoader _massAnalyzeLoader = new();
         private SettingsManager _settingsManager;
         private List<ReplayFolderData> _replayFolderDatas = new();
-        private List<ParasiteData> _parasiteDatas;
-        private readonly object _lock = new ();
+        private List<ParasiteData> _parasiteDatas;        
 
         public ParasiteMainUiWindow()
         {
@@ -34,25 +33,22 @@ namespace ParasiteReplayAnalyzer.UI
 
             InitializeComponent();
             LoadSettings();
-            LoadReplaysAsync();
+            LoadReplays();
             FillListBoxItems();
         }
         private void LoadSettings()
         {
-            if (File.Exists(_settingsManager.SettingsPath))
-            {
-                _settingsManager.LoadSettings();
-            }
-            else
+            if (!File.Exists(_settingsManager.SettingsPath))
             {
                 _settingsManager.SaveSettings(_settingsManager.Settings.Sc2ReplayDirectoryPath, _settingsManager.Settings.MaxConcurrentAnalyzeTasks);
-                _settingsManager.LoadSettings();
             }
+
+            _settingsManager.LoadSettings();
         }
 
-        public async void LoadReplaysAsync()
+        public void LoadReplays()
         {
-            _parasiteDatas = await Task.Run(() => _massAnalyzeLoader.Load());
+            _parasiteDatas = _massAnalyzeLoader.Load();
         }
 
         public void FillListBoxItems()

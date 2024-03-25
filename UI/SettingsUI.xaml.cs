@@ -27,7 +27,7 @@ namespace ParasiteReplayAnalyzer.UI
             _settingsManager.SaveSettings(newReplaysPath);
             _settingsManager.LoadSettings();
 
-            _mainUiWindow.LoadReplaysAsync();
+            _mainUiWindow.LoadReplays();
             _mainUiWindow.FillListBoxItems();
 
             Close();
