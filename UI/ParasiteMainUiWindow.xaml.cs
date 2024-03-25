@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Shapes;
 using Microsoft.Win32;
 using ParasiteReplayAnalyzer.Engine;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
@@ -14,6 +15,7 @@ using ParasiteReplayAnalyzer.Engine.FileHelpers;
 using ParasiteReplayAnalyzer.Engine.ReplayComponents;
 using ParasiteReplayAnalyzer.Engine.Top500;
 using ParasiteReplayAnalyzer.Saving;
+using Path = System.IO.Path;
 
 namespace ParasiteReplayAnalyzer.UI
 {
@@ -66,28 +68,34 @@ namespace ParasiteReplayAnalyzer.UI
 
             foreach (var path in allFileNames)
             {
-                var file = Path.GetFileNameWithoutExtension(path);
-
                 if (!IsParasiteReplay(path))
                 {
                     continue;
                 }
 
+
+                var fileName = Path.GetFileNameWithoutExtension(path);               
                 var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
+                var replayDisplay = $"{replayFolderCode}/{fileName}";
 
-                if (!_replayFolderDatas.Any(x => x.ReplayFolderCode.Equals(replayFolderCode)))
-                {
-                    _replayFolderDatas.Add(new ReplayFolderData(replayFolderCode, new List<ReplayData>()));
-                }
+                SetFolderData(fileName, path, replayFolderCode);
 
-                var folder = _replayFolderDatas.First(x => x.ReplayFolderCode == replayFolderCode);
-                folder.ReplaysData.Add(new ReplayData(file, path));
-
-                var index = _replayFolderDatas.IndexOf(folder);
-                _replayFolderDatas[index] = folder;
-
-                _listBoxReplays.Items.Add($"{replayFolderCode}/{file}");
+                _listBoxReplays.Items.Add(replayDisplay);
             }
+        }
+
+        private void SetFolderData(string fileName, string path, string replayFolderCode)
+        {
+            if (!_replayFolderDatas.Any(x => x.ReplayFolderCode.Equals(replayFolderCode)))
+            {
+                _replayFolderDatas.Add(new ReplayFolderData(replayFolderCode, new List<ReplayData>()));
+            }
+
+            var folder = _replayFolderDatas.First(x => x.ReplayFolderCode == replayFolderCode);
+            folder.ReplaysData.Add(new ReplayData(fileName, path));
+
+            var index = _replayFolderDatas.IndexOf(folder);
+            _replayFolderDatas[index] = folder;
         }
 
         private bool IsParasiteReplay(string replayName)
