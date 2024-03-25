@@ -56,35 +56,37 @@ namespace ParasiteReplayAnalyzer.UI
             _listBoxReplays.Items.Clear();
             _replayFolderDatas.Clear();
 
-            if (Directory.Exists(_settingsManager.Settings.Sc2ReplayDirectoryPath))
+            if (!Directory.Exists(_settingsManager.Settings.Sc2ReplayDirectoryPath))
             {
-                var allFileNames = Directory.GetFiles(_settingsManager.Settings.Sc2ReplayDirectoryPath, "*.Sc2Replay",
+                return;
+            }
+
+            var allFileNames = Directory.GetFiles(_settingsManager.Settings.Sc2ReplayDirectoryPath, "*.Sc2Replay",
                     SearchOption.AllDirectories);
 
-                foreach (var path in allFileNames)
+            foreach (var path in allFileNames)
+            {
+                var file = Path.GetFileNameWithoutExtension(path);
+
+                if (!IsParasiteReplay(path))
                 {
-                    var file = Path.GetFileNameWithoutExtension(path);
-
-                    if (!IsParasiteReplay(path))
-                    {
-                        continue;
-                    }
-
-                    var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
-
-                    if (!_replayFolderDatas.Any(x => x.ReplayFolderCode.Equals(replayFolderCode)))
-                    {
-                        _replayFolderDatas.Add(new ReplayFolderData(replayFolderCode, new List<ReplayData>()));
-                    }
-
-                    var folder = _replayFolderDatas.First(x => x.ReplayFolderCode == replayFolderCode);
-                    folder.ReplaysData.Add(new ReplayData(file, path));
-
-                    var index = _replayFolderDatas.IndexOf(folder);
-                    _replayFolderDatas[index] = folder;
-
-                    _listBoxReplays.Items.Add($"{replayFolderCode}/{file}");
+                    continue;
                 }
+
+                var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
+
+                if (!_replayFolderDatas.Any(x => x.ReplayFolderCode.Equals(replayFolderCode)))
+                {
+                    _replayFolderDatas.Add(new ReplayFolderData(replayFolderCode, new List<ReplayData>()));
+                }
+
+                var folder = _replayFolderDatas.First(x => x.ReplayFolderCode == replayFolderCode);
+                folder.ReplaysData.Add(new ReplayData(file, path));
+
+                var index = _replayFolderDatas.IndexOf(folder);
+                _replayFolderDatas[index] = folder;
+
+                _listBoxReplays.Items.Add($"{replayFolderCode}/{file}");
             }
         }
 
