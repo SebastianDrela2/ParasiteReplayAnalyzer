@@ -102,7 +102,7 @@ namespace ParasiteReplayAnalyzer.UI
             return replayName.Contains("P A R A S I T E - TEST");
         }
 
-        private void OnAnalyzeClicked(object sender, RoutedEventArgs e)
+        private async void OnAnalyzeClickedAsync(object sender, RoutedEventArgs e)
         {
             if (_listBoxReplays.SelectedItem != null)
             {
@@ -110,27 +110,28 @@ namespace ParasiteReplayAnalyzer.UI
 
                 if (selectedItem != null)
                 {
-                    _ = Task.Run(async () =>
-                    {
-                        var watch = new Stopwatch();
-                        watch.Start();
-
-                        var replayPath = FileHelperMethods.GetReplayPath(selectedItem, _replayFolderDatas);
-
-                        var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
-                        await parasiteAnalyzer.LoadParasiteData();
-
-                        await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
-                        watch.Stop();
-
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            _textBoxResult.Text += $"Analyzed: {parasiteAnalyzer.ParasiteData.GameMetaData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
-                        });
-
-                    }).ConfigureAwait(true);
+                    await Task.Run(async () => await AnalyzeReplayAsync(selectedItem)).ConfigureAwait(true);
                 }
             }
+        }
+
+        private async Task AnalyzeReplayAsync(string selectedItem)
+        {
+            var watch = new Stopwatch();
+            watch.Start();
+
+            var replayPath = FileHelperMethods.GetReplayPath(selectedItem, _replayFolderDatas);
+
+            var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
+            await parasiteAnalyzer.LoadParasiteData();
+
+            await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
+            watch.Stop();
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _textBoxResult.Text += $"Analyzed: {parasiteAnalyzer.ParasiteData.GameMetaData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
+            });
         }
 
         private async void OnMassAnalyzeClickedAsync(object sender, RoutedEventArgs e)

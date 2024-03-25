@@ -42,7 +42,7 @@
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
 
-            <Button x:Name="_buttonAnalyze" Content="ANALYZE" Grid.Column="1" Grid.Row="0" Click="OnAnalyzeClicked"/>
+            <Button x:Name="_buttonAnalyze" Content="ANALYZE" Grid.Column="1" Grid.Row="0" Click="OnAnalyzeClickedAsync"/>
             <Button x:Name="_buttonMassAnalyze" Content="MASS ANALYZE" Grid.Column="3" Grid.Row="0" Click="OnMassAnalyzeClickedAsync"/>
         </Grid>
 
