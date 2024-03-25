@@ -144,16 +144,11 @@ namespace ParasiteReplayAnalyzer.UI
             }
 
             var files = Directory.GetFiles(_settingsManager.ReplayResultsPath, "*.json", SearchOption.AllDirectories)
-                .Select(FileHelperMethods.GetParentDirectoryNameWithFile)
-                .ToHashSet();
-
-            var maxConcurrentTasks = 10;
-            var semaphore = new SemaphoreSlim(maxConcurrentTasks);
-            var watch = new Stopwatch();
-
+                .Select(FileHelperMethods.GetParentDirectoryNameWithFile).ToHashSet();
+            
             var allReplays = _replayFolderDatas.SelectMany(y => y.ReplaysData).Select(x => x.ReplayPath);                      
-
             var cancellationTokenSource = new CancellationTokenSource();
+
             await Task.Run(() => AnalyzeReplaysAsync(allReplays, files, cancellationTokenSource), cancellationTokenSource.Token);
         }
 
