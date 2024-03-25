@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Shapes;
 using Microsoft.Win32;
 using ParasiteReplayAnalyzer.Engine;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
