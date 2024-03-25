@@ -65,23 +65,25 @@ namespace ParasiteReplayAnalyzer.UI
                 {
                     var file = Path.GetFileNameWithoutExtension(path);
 
-                    if (IsParasiteReplay(path))
+                    if (!IsParasiteReplay(path))
                     {
-                        var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
-
-                        if (!_replayFolderDatas.Any(x => x.ReplayFolderCode.Equals(replayFolderCode)))
-                        {
-                            _replayFolderDatas.Add(new ReplayFolderData(replayFolderCode, new List<ReplayData>()));
-                        }
-
-                        var folder = _replayFolderDatas.First(x => x.ReplayFolderCode == replayFolderCode);
-                        folder.ReplaysData.Add(new ReplayData(file, path));
-
-                        var index = _replayFolderDatas.IndexOf(folder);
-                        _replayFolderDatas[index] = folder;
-
-                        _listBoxReplays.Items.Add($"{replayFolderCode}/{file}");
+                        continue;
                     }
+
+                    var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
+
+                    if (!_replayFolderDatas.Any(x => x.ReplayFolderCode.Equals(replayFolderCode)))
+                    {
+                        _replayFolderDatas.Add(new ReplayFolderData(replayFolderCode, new List<ReplayData>()));
+                    }
+
+                    var folder = _replayFolderDatas.First(x => x.ReplayFolderCode == replayFolderCode);
+                    folder.ReplaysData.Add(new ReplayData(file, path));
+
+                    var index = _replayFolderDatas.IndexOf(folder);
+                    _replayFolderDatas[index] = folder;
+
+                    _listBoxReplays.Items.Add($"{replayFolderCode}/{file}");
                 }
             }
         }
@@ -192,7 +194,7 @@ namespace ParasiteReplayAnalyzer.UI
                 var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
                 await parasiteAnalyzer.LoadParasiteData();
 
-                _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
+                await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
             }
             finally
             {
