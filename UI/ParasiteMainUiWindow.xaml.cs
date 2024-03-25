@@ -91,7 +91,7 @@ namespace ParasiteReplayAnalyzer.UI
             return replayName.Contains("P A R A S I T E - TEST");
         }
 
-        private async void OnAnalyzeClicked(object sender, RoutedEventArgs e)
+        private void OnAnalyzeClicked(object sender, RoutedEventArgs e)
         {
             if (_listBoxReplays.SelectedItem != null)
             {
