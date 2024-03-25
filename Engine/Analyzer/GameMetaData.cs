@@ -1,7 +1,7 @@
 ﻿using s2protocol.NET.Models;
 using System.Collections.Generic;
 
-namespace ParasiteReplayAnalyzer.Engine
+namespace ParasiteReplayAnalyzer.Engine.Analyzer
 {
     public struct GameMetaData
     {
@@ -20,6 +20,6 @@ namespace ParasiteReplayAnalyzer.Engine
             GameLength = gameLength;
             Players = players;
             PlayerHandles = playerHandles;
-        }       
+        }
     }
 }

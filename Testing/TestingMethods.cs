@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using ParasiteReplayAnalyzer.Engine;
+using ParasiteReplayAnalyzer.Engine.Analyzer;
 using s2protocol.NET;
 using s2protocol.NET.Models;
 

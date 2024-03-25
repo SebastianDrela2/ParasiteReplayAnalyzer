@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Newtonsoft.Json;
 using s2protocol.NET.Models;
 
-namespace ParasiteReplayAnalyzer.Engine
+namespace ParasiteReplayAnalyzer.Engine.Analyzer
 {
     public class PlayerData
     {
         [JsonProperty]
         public string PlayerName;
 
-        [JsonProperty] 
+        [JsonProperty]
         public string Handle;
 
         [JsonProperty]
@@ -25,7 +24,7 @@ namespace ParasiteReplayAnalyzer.Engine
         [JsonProperty]
         public bool IsAlive;
 
-        [JsonProperty] 
+        [JsonProperty]
         public double LifeTimePercentage;
 
         public PlayerData()

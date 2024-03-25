@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using s2protocol.NET;
 using s2protocol.NET.Models;
 
-namespace ParasiteReplayAnalyzer.Engine
+namespace ParasiteReplayAnalyzer.Engine.Analyzer
 {
     public class ParasiteData
     {
@@ -13,7 +13,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
         [JsonProperty]
         public GameData GameData;
-           
+
         [JsonProperty]
         public Dictionary<string, int> PlayersKills;
 
@@ -22,7 +22,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
         [JsonProperty]
         public string VictoryStatus;
-        
+
         public ParasiteData()
         {
 
@@ -31,10 +31,10 @@ namespace ParasiteReplayAnalyzer.Engine
         {
             GameMetaData = gameMetaData;
             GameData = gameData;
-                               
-            PlayersKills = gameData.PlayerKills.Select(x=> new KeyValuePair<string,int>(methodHelper.GetHandles(x.Key), x.Value))
+
+            PlayersKills = gameData.PlayerKills.Select(x => new KeyValuePair<string, int>(methodHelper.GetHandles(x.Key), x.Value))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                   
+
             AddPlayerDatas(gameData, gameMetaData.Players, methodHelper);
 
             VictoryStatus = GetMatchStatus();
@@ -54,7 +54,7 @@ namespace ParasiteReplayAnalyzer.Engine
         private string GetMatchStatus()
         {
             var anyAlienIsAlive = PlayerDatas.Any(x => x is { IsHost: true, IsAlive: true } or { IsSpawn: true, IsAlive: true });
-            var anyHumanIsAlive = PlayerDatas.Any(x => x is {IsHost: false, IsSpawn:false, IsAlive:true});
+            var anyHumanIsAlive = PlayerDatas.Any(x => x is { IsHost: false, IsSpawn: false, IsAlive: true });
 
             if (anyAlienIsAlive && anyHumanIsAlive || !anyAlienIsAlive && !anyHumanIsAlive)
             {

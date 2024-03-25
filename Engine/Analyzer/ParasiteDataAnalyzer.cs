@@ -7,7 +7,7 @@ using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using s2protocol.NET;
 using s2protocol.NET.Models;
 
-namespace ParasiteReplayAnalyzer.Engine
+namespace ParasiteReplayAnalyzer.Engine.Analyzer
 {
     public class ParasiteDataAnalyzer
     {
@@ -47,11 +47,11 @@ namespace ParasiteReplayAnalyzer.Engine
 
         private ParasiteData GetParasiteData(Sc2Replay replay)
         {
-            var parasiteMethodHelper = new ParasiteMethodHelper();            
+            var parasiteMethodHelper = new ParasiteMethodHelper();
             var upgradeEvents = parasiteMethodHelper.FilterUpgradeEvents(replay.TrackerEvents.SUpgradeEvents);
             var players = replay.Details!.Players.ToList();
             players!.ModifySecondToLastAndLastPlayers();
-                       
+
             var gameMetaData = GetGameMetaData(replay, players, parasiteMethodHelper);
             var gameData = GetGameData(replay, players, parasiteMethodHelper, upgradeEvents);
 
@@ -61,7 +61,7 @@ namespace ParasiteReplayAnalyzer.Engine
         private GameData GetGameData(Sc2Replay replay, List<DetailsPlayer> players, ParasiteMethodHelper parasiteMethodHelper, ICollection<SUpgradeEvent> upgradeEvents)
         {
             var specialRoleTeams = parasiteMethodHelper.GetSpecialRoleTeams(players, upgradeEvents);
-            var humanPlayerNames = parasiteMethodHelper.GetHumanPlayers(players, specialRoleTeams).Select(x => x.Name);           
+            var humanPlayerNames = parasiteMethodHelper.GetHumanPlayers(players, specialRoleTeams).Select(x => x.Name);
             var playerKills = parasiteMethodHelper.GetPlayerKills(players, replay.TrackerEvents.SUnitBornEvents);
             var dictOfLifePercentages = parasiteMethodHelper.GetLifeTimePercentagesList(replay.TrackerEvents.SUnitBornEvents, players, replay.Metadata);
             var lastEvolution = parasiteMethodHelper.GetLastHostEvolution(replay.TrackerEvents.SUnitBornEvents);
@@ -73,12 +73,12 @@ namespace ParasiteReplayAnalyzer.Engine
 
         private GameMetaData GetGameMetaData(Sc2Replay replay, List<DetailsPlayer> players, ParasiteMethodHelper parasiteMethodHelper)
         {
-            var replayName = Path.GetFileNameWithoutExtension(replay.FileName);           
-            var gameLength = replay.Metadata?.Duration ?? 0;                     
-            var playerHandles = parasiteMethodHelper.GetHandlesList(players);          
+            var replayName = Path.GetFileNameWithoutExtension(replay.FileName);
+            var gameLength = replay.Metadata?.Duration ?? 0;
+            var playerHandles = parasiteMethodHelper.GetHandlesList(players);
             var replayKey = GetReplayKey(players);
 
-           return new GameMetaData(replayName, _parasiteReplayPath, replayKey, gameLength, players, playerHandles);
+            return new GameMetaData(replayName, _parasiteReplayPath, replayKey, gameLength, players, playerHandles);
         }
 
         private string GetReplayKey(IEnumerable<DetailsPlayer> detailsPlayers)

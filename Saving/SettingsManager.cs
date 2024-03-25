@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using ParasiteReplayAnalyzer.Engine;
+using ParasiteReplayAnalyzer.Engine.Analyzer;
 using ParasiteReplayAnalyzer.Engine.FileHelpers;
 using ParasiteReplayAnalyzer.Engine.ReplayComponents;
 

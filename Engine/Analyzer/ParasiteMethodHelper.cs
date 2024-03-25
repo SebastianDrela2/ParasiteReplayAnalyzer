@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace ParasiteReplayAnalyzer.Engine
+namespace ParasiteReplayAnalyzer.Engine.Analyzer
 {
     public class ParasiteMethodHelper
     {
@@ -48,7 +48,7 @@ namespace ParasiteReplayAnalyzer.Engine
         }
 
         public ICollection<SUpgradeEvent> FilterUpgradeEvents(ICollection<SUpgradeEvent> upgradeEvents)
-        {            
+        {
             var filters = ReadResource("ParasiteReplayAnalyzer.Filters.UpgradeEventsFilters.txt");
 
             ICollection<SUpgradeEvent> newUpgradeEvents = new List<SUpgradeEvent>();
@@ -115,7 +115,7 @@ namespace ParasiteReplayAnalyzer.Engine
                     var isAlien = spawns.Any(x => x.Toon.Equals(player.Toon)) || alien == player;
                     var isNotAlien = !spawns.Contains(player) && alien != player;
 
-                    if ((isAlien && alienFilters.Contains(sUnitBornEvent.UnitTypeName)) || spawnedList.Any(x => x.Toon.Equals(x.Toon)))
+                    if (isAlien && alienFilters.Contains(sUnitBornEvent.UnitTypeName) || spawnedList.Any(x => x.Toon.Equals(x.Toon)))
                     {
                         alivePlayers.Remove(player);
                     }
@@ -140,7 +140,7 @@ namespace ParasiteReplayAnalyzer.Engine
 
             return color switch
             {
-                { R:0 ,G:66 ,B:255} => "Blue",
+                { R: 0, G: 66, B: 255 } => "Blue",
                 { R: 254, G: 138, B: 14 } => "Orange",
                 { R: 22, G: 128, B: 0 } => "Green",
                 { R: 16, G: 98, B: 70 } => "DarkGreen",
@@ -234,7 +234,7 @@ namespace ParasiteReplayAnalyzer.Engine
                 return 0;
             }
 
-            var lifeTimeInPercentages = (seconds / matchLength) * 100;
+            var lifeTimeInPercentages = seconds / matchLength * 100;
 
             return lifeTimeInPercentages;
         }
@@ -250,7 +250,7 @@ namespace ParasiteReplayAnalyzer.Engine
             };
         }
 
-        public  List<DetailsPlayer> GetHumanPlayers(ICollection<DetailsPlayer> players, List<DetailsPlayer?> specialRoleTeams)
+        public List<DetailsPlayer> GetHumanPlayers(ICollection<DetailsPlayer> players, List<DetailsPlayer?> specialRoleTeams)
         {
             return players.Where(player => specialRoleTeams.All(specialRole => specialRole?.Toon != player.Toon)).ToList();
         }

@@ -1,7 +1,7 @@
 ﻿using s2protocol.NET.Models;
 using System.Collections.Generic;
 
-namespace ParasiteReplayAnalyzer.Engine
+namespace ParasiteReplayAnalyzer.Engine.Analyzer
 {
     public struct GameData
     {
@@ -22,6 +22,6 @@ namespace ParasiteReplayAnalyzer.Engine
             LastHostEvolution = lastEvolution;
             AlivePlayers = alivePlayers;
             Spawns = spawns;
-        }       
+        }
     }
 }

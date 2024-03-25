@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Win32;
 using ParasiteReplayAnalyzer.Engine;
+using ParasiteReplayAnalyzer.Engine.Analyzer;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using ParasiteReplayAnalyzer.Engine.FileHelpers;
 using ParasiteReplayAnalyzer.Engine.ReplayComponents;
