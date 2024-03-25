@@ -73,7 +73,6 @@ namespace ParasiteReplayAnalyzer.UI
                     continue;
                 }
 
-
                 var fileName = Path.GetFileNameWithoutExtension(path);               
                 var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
                 var replayDisplay = $"{replayFolderCode}/{fileName}";
