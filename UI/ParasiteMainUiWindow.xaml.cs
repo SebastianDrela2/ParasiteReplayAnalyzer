@@ -66,21 +66,38 @@ namespace ParasiteReplayAnalyzer.UI
             var allFileNames = Directory.GetFiles(_settingsManager.Settings.Sc2ReplayDirectoryPath, "*.Sc2Replay",
                     SearchOption.AllDirectories);
 
+            var orderedParasiteRecords = GetOrderedParasiteRecords(allFileNames);
+             
+            foreach(var record in orderedParasiteRecords)
+            {
+                var displayName = record.GetDisplayName();
+                _listBoxReplays.Items.Add(displayName);
+            }
+        }
+
+        private IOrderedEnumerable<ParasiteRecord> GetOrderedParasiteRecords(string[] allFileNames)
+        {
+            var parasiteRecords = new List<ParasiteRecord>();
+
             foreach (var path in allFileNames)
             {
-                if (!IsParasiteReplay(path))
+                var fileName = Path.GetFileNameWithoutExtension(path);
+                var parasiteRecord = GetParasiteRecord(fileName);
+
+                if (parasiteRecord is null)
                 {
                     continue;
                 }
-
-                var fileName = Path.GetFileNameWithoutExtension(path);               
+               
                 var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
                 var replayDisplay = $"{replayFolderCode}/{fileName}";
 
                 SetReplayFolderData(fileName, path, replayFolderCode);
-
-                _listBoxReplays.Items.Add(replayDisplay);
+                parasiteRecord.SetDisplayName(replayDisplay);
+                parasiteRecords.Add(parasiteRecord);
             }
+
+            return parasiteRecords.OrderBy(x => x.ReplayNumber);
         }
 
         private void SetReplayFolderData(string fileName, string path, string replayFolderCode)
@@ -97,9 +114,14 @@ namespace ParasiteReplayAnalyzer.UI
             _replayFolderDatas[index] = folder;
         }
 
-        private bool IsParasiteReplay(string replayName)
+        private ParasiteRecord? GetParasiteRecord(string replayName)
         {
-            return replayName.Contains("P A R A S I T E - TEST");
+            if(!replayName.Contains("P A R A S I T E - TEST"))
+            {
+                return null;
+            }
+
+            return new ParasiteRecord(replayName);
         }
 
         private async void OnAnalyzeClickedAsync(object sender, RoutedEventArgs e)
