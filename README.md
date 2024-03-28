@@ -8,8 +8,9 @@
 3. Replays will be automatically fetched from the default replays folder, folder can be changed in the `Options` menu.
 4. After analysis such actions can be performed to display desired stats
 
-![obraz](https://github.com/SebastianDrela2/ParasiteReplayAnalyzer/assets/107455395/afa8f2af-f7e8-488b-b3b4-1f8d3e8b94f1)
+![obraz](https://github.com/SebastianDrela2/ParasiteReplayAnalyzer/assets/107455395/56411615-d605-44b1-86da-12a385b60be8)
 
 ## Media
 
-![parasiteshowoff](https://github.com/SebastianDrela2/ParasiteReplayAnalyzer/assets/107455395/b31f4430-2284-45e7-9b8e-05202a04745c)
+![parasiteshowoff2](https://github.com/SebastianDrela2/ParasiteReplayAnalyzer/assets/107455395/44251829-9667-4d86-8acb-4dcded18f3c0)
+
