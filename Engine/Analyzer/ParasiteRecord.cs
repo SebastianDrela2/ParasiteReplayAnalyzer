@@ -5,7 +5,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
 {
     internal class ParasiteRecord
     {
-        private const string _numberRegexPattern = @"\d+";
+        private const string _digitsRegexPattern = @"\d+";
 
         private string _displayName;
 
@@ -14,7 +14,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
 
         public ParasiteRecord(string replayName)
         {
-            var regex = new Regex(_numberRegexPattern);
+            var regex = new Regex(_digitsRegexPattern);
             var match = regex.Matches(replayName).FirstOrDefault()?.Value;
 
             if (match is null)
