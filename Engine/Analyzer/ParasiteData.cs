@@ -32,7 +32,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
             GameMetaData = gameMetaData;
             GameData = gameData;
 
-            PlayersKills = gameData.PlayerKills.Select(x => new KeyValuePair<string, int>(methodHelper.GetHandles(x.Key), x.Value))
+            PlayersKills = gameData.PlayerKills.Select(x => new KeyValuePair<string, int>(x.Key, x.Value))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             AddPlayerDatas(gameData, gameMetaData.Players, methodHelper);
@@ -44,7 +44,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
         {
             foreach (var player in players.Where(player => player.Name is not ("Alien AI" or "Station Security")))
             {
-                gameData.DictOfLifePercentages.TryGetValue(player, out var lifeDurationPercentage);
+                gameData.DictOfLifePercentages.TryGetValue(methodHelper.GetHandles(player), out var lifeDurationPercentage);
                 var playerData = new PlayerData(gameData, player, methodHelper, lifeDurationPercentage);
 
                 PlayerDatas.Add(playerData);

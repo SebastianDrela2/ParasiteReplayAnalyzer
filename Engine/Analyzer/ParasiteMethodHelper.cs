@@ -72,9 +72,9 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
             return bornEvents.LastOrDefault(x => filters.Contains(x.UnitTypeName)).UnitTypeName;
         }
 
-        public Dictionary<DetailsPlayer, int> GetPlayerKills(ICollection<DetailsPlayer> detailsPlayers, ICollection<SUnitBornEvent> sUnitBornEvents)
+        public Dictionary<string, int> GetPlayerKills(ICollection<DetailsPlayer> detailsPlayers, ICollection<SUnitBornEvent> sUnitBornEvents)
         {
-            var playersKillsDict = detailsPlayers.ToDictionary(player => player, _ => 0);
+            var playersKillsDict = detailsPlayers.ToDictionary(player => GetHandles(player), _ => 0);
             var unitsThatCountAsPlayerKills = new HashSet<string>(ReadResource("ParasiteReplayAnalyzer.Filters.UnitsThatCountAsPlayerKills.txt"));
 
             foreach (var sUnitBornEvent in sUnitBornEvents)
@@ -89,7 +89,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
                     {
                         if (IsAlienOrStationSecurity(player.Name) || unitsThatCountAsPlayerKills.Contains(killerBornEvent.UnitTypeName))
                         {
-                            playersKillsDict[player]++;
+                            playersKillsDict[GetHandles(player)]++;
                         }
                     }
                 }
@@ -201,14 +201,14 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
             return playerDict;
         }
 
-        public Dictionary<DetailsPlayer, double> GetLifeTimePercentagesList(ICollection<SUnitBornEvent> sUnitBornEvents, ICollection<DetailsPlayer> detailsPlayers, Metadata metadata)
+        public Dictionary<string, double> GetLifeTimePercentagesList(ICollection<SUnitBornEvent> sUnitBornEvents, ICollection<DetailsPlayer> detailsPlayers, Metadata metadata)
         {
-            var lifeTimeDict = new Dictionary<DetailsPlayer, double>();
+            var lifeTimeDict = new Dictionary<string, double>();
             var filters = new HashSet<string>(ReadResource("ParasiteReplayAnalyzer.Filters.UnitsThatCountAsPlayerKills.txt"));
 
             foreach (var player in detailsPlayers)
             {
-                lifeTimeDict.Add(player, 100);
+                lifeTimeDict.Add(GetHandles(player), 100);
             }
 
             foreach (var sUnitBornEvent in sUnitBornEvents.Where(UnitCanBeConsideredKill))
@@ -217,7 +217,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
 
                 if (player != null && filters.Contains(sUnitBornEvent.UnitTypeName))
                 {
-                    lifeTimeDict[player] = GetLifePercentage(sUnitBornEvent.SUnitDiedEvent!.Gameloop, metadata);
+                    lifeTimeDict[GetHandles(player)] = GetLifePercentage(sUnitBornEvent.SUnitDiedEvent!.Gameloop, metadata);
                 }
             }
 

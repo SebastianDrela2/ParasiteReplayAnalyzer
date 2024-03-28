@@ -81,7 +81,8 @@
                      Grid.Row="0" 
                      Height="800"
                      Foreground="Yellow"
-                     FontFamily="Cambria"
+                     FontFamily="Arial"
+                     FontWeight="Bold"
                      FontSize="20">
                 <TextBox.Background>
                     <SolidColorBrush Color="Black" Opacity="0.3"/>
