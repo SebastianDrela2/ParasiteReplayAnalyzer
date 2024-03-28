@@ -118,11 +118,16 @@ namespace ParasiteReplayAnalyzer.UI
         private async Task AnalyzeReplayAsync(string selectedItem)
         {
             var watch = new Stopwatch();
-            watch.Start();
-
+            watch.Start();           
             var replayPath = FileHelperMethods.GetReplayPath(selectedItem, _replayFolderDatas);
 
             var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _textBoxResult.Text = $"Analyzing {replayPath}...";
+            });
+
             await parasiteAnalyzer.LoadParasiteData();
 
             await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
@@ -130,7 +135,7 @@ namespace ParasiteReplayAnalyzer.UI
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                _textBoxResult.Text += $"Analyzed: {parasiteAnalyzer.ParasiteData.GameMetaData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
+                _textBoxResult.Text = $"Analyzed: {parasiteAnalyzer.ParasiteData.GameMetaData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
             });
         }
 

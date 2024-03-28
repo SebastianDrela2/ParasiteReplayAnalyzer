@@ -3,9 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ParasiteReplayAnalyzer"
         mc:Ignorable="d"
-        Title="Parasite Analyzer" Height="850" Width="1200">
+        Title="Starcraft Parasite Analyzer" Height="850" Width="1200" Icon="\Images\parasite.png">
+    <Window.Background>
+        <ImageBrush ImageSource="\Images\parasite.png" Stretch="Fill"/>
+    </Window.Background>
+    
     <StackPanel>
         <Grid>
             <Menu>
@@ -27,7 +30,7 @@
             </Menu>
         </Grid>
 
-        <Grid>
+        <Grid Margin="0 5 0 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="5"/>
                 <ColumnDefinition Width="*"/>
@@ -48,8 +51,8 @@
 
         <Grid MinHeight="395" Margin="0 10 0 0">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="4*"/>
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
@@ -57,10 +60,33 @@
             </Grid.RowDefinitions>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <ListBox x:Name="_listBoxReplays" Height="800"/>
+                <ListBox x:Name="_listBoxReplays"
+                         Width="auto"
+                         Height="800"
+                         FontFamily="Cambria"
+                         FontWeight="Bold"
+                         Foreground="LimeGreen"
+                         BorderThickness="0"
+                         FontSize="15"                                               
+                         >
+                    <ListBox.Background>
+                        <SolidColorBrush Color="Black" Opacity="0.3"/>
+                    </ListBox.Background>
+                    
+                </ListBox>
             </ScrollViewer>
 
-            <TextBox x:Name="_textBoxResult" Grid.Column="1" Grid.Row="0" Height="800" FontSize="20"/>
+            <TextBox x:Name="_textBoxResult" 
+                     Grid.Column="1" 
+                     Grid.Row="0" 
+                     Height="800"
+                     Foreground="Yellow"
+                     FontFamily="Cambria"
+                     FontSize="20">
+                <TextBox.Background>
+                    <SolidColorBrush Color="Black" Opacity="0.3"/>
+                </TextBox.Background>
+            </TextBox>
         </Grid>
     </StackPanel>
 </Window>

@@ -12,6 +12,7 @@
     <None Remove="Filters\UnitsThatCanKillButKillDoesNotCount.txt" />
     <None Remove="Filters\UnitsThatCountAsPlayerKills.txt" />
     <None Remove="Filters\UpgradeEventsFilters.txt" />
+    <None Remove="Images\parasite.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +37,12 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Sharpness.Logging.Aspnet" Version="1.0.0" />
     <PackageReference Include="s2protocol.NET" Version="0.6.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\parasite.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>
