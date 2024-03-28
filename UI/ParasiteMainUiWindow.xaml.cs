@@ -131,7 +131,7 @@ namespace ParasiteReplayAnalyzer.UI
 
                 if (selectedItem != null)
                 {
-                    await Task.Run(() => AnalyzeReplayAsync(selectedItem)).ConfigureAwait(true);
+                    await AnalyzeReplayAsync(selectedItem);
                 }
             }
         }
@@ -149,7 +149,7 @@ namespace ParasiteReplayAnalyzer.UI
                 _textBoxResult.Text = $"Analyzing {replayPath}...";
             });
 
-            await parasiteAnalyzer.LoadParasiteData();
+            await parasiteAnalyzer.LoadParasiteDataAsync();
 
             await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
             watch.Stop();
@@ -229,7 +229,7 @@ namespace ParasiteReplayAnalyzer.UI
             try
             {
                 var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
-                await parasiteAnalyzer.LoadParasiteData();
+                await parasiteAnalyzer.LoadParasiteDataAsync();
 
                 await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
             }
@@ -420,7 +420,7 @@ namespace ParasiteReplayAnalyzer.UI
                 var replayPath = openFileDialog.FileName;
                 var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
 
-                await parasiteAnalyzer.LoadParasiteData();
+                await parasiteAnalyzer.LoadParasiteDataAsync();
                 await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData!);
             }
 

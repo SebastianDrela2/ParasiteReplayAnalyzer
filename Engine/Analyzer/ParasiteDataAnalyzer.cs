@@ -23,9 +23,9 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
             _parasiteReplayPath = parasiteReplayPath;
         }
 
-        public async Task LoadParasiteData()
+        public async Task LoadParasiteDataAsync()
         {
-            var sc2Replay = await GetSc2Replay();
+            var sc2Replay = await GetSc2ReplayAsync();
 
             if (sc2Replay != null)
             {
@@ -33,7 +33,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
             }
         }
 
-        private async Task<Sc2Replay?> GetSc2Replay()
+        private async Task<Sc2Replay?> GetSc2ReplayAsync()
         {
             if (_assemblyPath != null)
             {
