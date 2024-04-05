@@ -7,16 +7,11 @@ namespace ParasiteReplayAnalyzer.Engine.Top500
 {
     public class MassAnalyzeCalculator
     {
-        private List<PlayerStats>? _playerStats;
+        private readonly List<PlayerStats>? _playerStats;
         private readonly List<ParasiteData>? _parasiteDatas;
 
         public MassAnalyzeCalculator(List<ParasiteData> parasiteDatas)
-        {
-            if (_parasiteDatas != null || _playerStats != null)
-            {
-                return;
-            }
-
+        {         
             _parasiteDatas = parasiteDatas;
             _playerStats = PlayerStats.GetPlayerStats(parasiteDatas);
         }
