@@ -17,6 +17,7 @@ namespace ParasiteReplayAnalyzer.Saving
         public Settings(string sc2ReplayDirectoryPath, int maxConcurrentAnalyzeTasks)
         {
             Sc2ReplayDirectoryPath = sc2ReplayDirectoryPath;
+            MaxConcurrentAnalyzeTasks = maxConcurrentAnalyzeTasks;
         }
     }
 }

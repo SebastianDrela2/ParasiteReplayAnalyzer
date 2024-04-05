@@ -11,11 +11,11 @@ namespace ParasiteReplayAnalyzer.Saving
 {
     public class SettingsManager
     {
+        public readonly string SettingsPath = GetDefaultSettingsPath();
+
         public Settings? Settings => LoadSettings();
         public string ReplayResultsPath => ReplayFolderData.GetReplayResultsPath();
-
-        public string SettingsPath => GetDefaultSettingsPath();
-
+        
         public Settings? LoadSettings()
         {
             if (!File.Exists(SettingsPath))
@@ -74,7 +74,7 @@ namespace ParasiteReplayAnalyzer.Saving
             return defaultReplaysPath;
         }
 
-        public string GetDefaultSettingsPath()
+        private static string GetDefaultSettingsPath()
         {
             var settingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ParasiteReplayAnalyzer", "Settings");
             var settingsFileName = "settings.json";

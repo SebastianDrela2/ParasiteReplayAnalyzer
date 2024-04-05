@@ -24,19 +24,18 @@ namespace ParasiteReplayAnalyzer.UI
     public partial class ParasiteMainUiWindow : Window
     {
         private MassAnalyzeLoader _massAnalyzeLoader = new();
-        private SettingsManager _settingsManager;
+        private SettingsManager _settingsManager = new();
         private List<ReplayFolderData> _replayFolderDatas = new();
         private List<ParasiteData> _parasiteDatas;        
 
         public ParasiteMainUiWindow()
-        {
-            _settingsManager = new SettingsManager();
-
+        {           
             InitializeComponent();
             LoadSettings();
             LoadReplays();
             FillListBoxItems();
         }
+
         private void LoadSettings()
         {
             if (!File.Exists(_settingsManager.SettingsPath))
