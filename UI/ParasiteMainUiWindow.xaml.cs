@@ -32,7 +32,7 @@ namespace ParasiteReplayAnalyzer.UI
         {           
             InitializeComponent();
             LoadSettings();
-            LoadReplays();
+            LoadParasiteDatas();
             FillListBoxItems();
         }
 
@@ -46,7 +46,7 @@ namespace ParasiteReplayAnalyzer.UI
             _settingsManager.LoadSettings();
         }
 
-        public void LoadReplays()
+        public void LoadParasiteDatas()
         {
             _parasiteDatas = _massAnalyzeLoader.Load();
         }
@@ -174,7 +174,7 @@ namespace ParasiteReplayAnalyzer.UI
             var allReplays = _replayFolderDatas.SelectMany(y => y.ReplaysData).Select(x => x.ReplayPath);                      
             var cancellationTokenSource = new CancellationTokenSource();
 
-            await Task.Run(() => AnalyzeReplaysAsync(allReplays, files, cancellationTokenSource), cancellationTokenSource.Token);
+            await AnalyzeReplaysAsync(allReplays, files, cancellationTokenSource);
         }
 
         private async Task AnalyzeReplaysAsync(IEnumerable<string> allReplays, HashSet<string> files, CancellationTokenSource cancellationTokenSource)
