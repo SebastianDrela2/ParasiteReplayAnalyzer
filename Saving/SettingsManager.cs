@@ -13,10 +13,10 @@ namespace ParasiteReplayAnalyzer.Saving
     {
         public readonly string SettingsPath = GetDefaultSettingsPath();
 
-        public Settings? Settings => LoadSettings();
+        public Settings Settings => LoadSettings();
         public string ReplayResultsPath => ReplayFolderData.GetReplayResultsPath();
         
-        public Settings? LoadSettings()
+        public Settings LoadSettings()
         {
             if (!File.Exists(SettingsPath))
             {
@@ -24,7 +24,7 @@ namespace ParasiteReplayAnalyzer.Saving
             }
 
             var json = File.ReadAllText(SettingsPath);
-            return JsonConvert.DeserializeObject<Settings>(json);
+            return JsonConvert.DeserializeObject<Settings>(json)!;
         }
 
         public void SaveSettings(string replaysPath, int maxConcurrentTasks = 10)
