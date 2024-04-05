@@ -28,7 +28,7 @@ namespace ParasiteReplayAnalyzer.UI
             _settingsManager.LoadSettings();
 
             _mainUiWindow.LoadParasiteDatas();
-            _mainUiWindow.FillListBoxItems();
+            _mainUiWindow.SetUi();
 
             Close();
         }

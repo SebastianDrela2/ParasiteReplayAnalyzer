@@ -33,7 +33,7 @@ namespace ParasiteReplayAnalyzer.UI
             InitializeComponent();
             LoadSettings();
             LoadParasiteDatas();
-            FillListBoxItems();
+            SetUi();
         }
 
         private void LoadSettings()
@@ -51,7 +51,13 @@ namespace ParasiteReplayAnalyzer.UI
             _parasiteDatas = _massAnalyzeLoader.Load();
         }
 
-        public void FillListBoxItems()
+        public void SetUi()
+        {
+            FillListBoxItems();
+            SetReplayCount();
+        }
+
+        private void FillListBoxItems()
         {
             _listBoxReplays.Items.Clear();
             _replayFolderDatas.Clear();
@@ -71,6 +77,11 @@ namespace ParasiteReplayAnalyzer.UI
                 var displayName = record.GetDisplayName();
                 _listBoxReplays.Items.Add(displayName);
             }
+        }
+
+        private void SetReplayCount()
+        {
+            _textBoxDetectedReplays.Text = $"Detected Replays: {_listBoxReplays.Items.Count}";
         }
 
         private IOrderedEnumerable<ParasiteRecord> GetOrderedParasiteRecords(string[] allFileNames)
