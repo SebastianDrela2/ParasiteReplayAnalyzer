@@ -47,7 +47,7 @@ namespace ParasiteReplayAnalyzer.Engine.FileHelpers
             return result;
         }
 
-        public static string ExtractReplayPathFromSelectedItem(string selectedItem)
+        public static string ExtractReplayNameFromSelectedItem(string selectedItem)
         {
             var result = string.Empty;
 
@@ -55,14 +55,14 @@ namespace ParasiteReplayAnalyzer.Engine.FileHelpers
 
             foreach (var c in selectedItem)
             {
-                if (c == '/')
-                {
-                    passedSlash = true;
-                }
-                else if (passedSlash)
+                if (passedSlash)
                 {
                     result += c;
                 }
+                else if (c == '/')
+                {
+                    passedSlash = true;
+                }              
             }
 
             return result;
@@ -71,10 +71,10 @@ namespace ParasiteReplayAnalyzer.Engine.FileHelpers
         public static string GetReplayPath(string selectedItem, List<ReplayFolderData> replayFolderDatas)
         {
             var code = ExtractCodeFromSelectedItem(selectedItem);
-            var replay = ExtractReplayPathFromSelectedItem(selectedItem);
+            var replayName = ExtractReplayNameFromSelectedItem(selectedItem);
 
             var folder = replayFolderDatas.First(x => x.ReplayFolderCode.Equals(code));
-            var replayPath = folder.ReplaysData.First(x => x.ReplayName.Equals(replay)).ReplayPath;
+            var replayPath = folder.ReplaysData.First(x => x.ReplayName.Equals(replayName)).ReplayPath;
 
             return replayPath;
         }
