@@ -16,7 +16,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
         private static readonly string? _assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         private static ReplayDecoder _decoder = new ReplayDecoder(_assemblyPath);
 
-        public ParasiteData? ParasiteData { get; set; }
+        public ParasiteData ParasiteData { get; set; }
 
         public ParasiteDataAnalyzer(string parasiteReplayPath)
         {
