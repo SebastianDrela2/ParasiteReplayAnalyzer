@@ -143,6 +143,8 @@ namespace ParasiteReplayAnalyzer.UI
                 {
                     await AnalyzeReplayAsync(selectedItem);
                 }
+
+                LoadParasiteDatas();
             }
         }
 
@@ -186,6 +188,8 @@ namespace ParasiteReplayAnalyzer.UI
             var cancellationTokenSource = new CancellationTokenSource();
 
             await AnalyzeReplaysAsync(allReplays, files, cancellationTokenSource);
+
+            LoadParasiteDatas();
         }
 
         private async Task AnalyzeReplaysAsync(IEnumerable<string> allReplays, HashSet<string> files, CancellationTokenSource cancellationTokenSource)
