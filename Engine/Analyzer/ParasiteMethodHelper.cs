@@ -292,13 +292,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
 
         private List<string> ReadResource(string resourceName)
         {
-            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName);
-
-            if (stream == null)
-            {
-                return null;
-            }
-
+            var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName)!;         
             var returnList = new List<string>();
 
             using var reader = new StreamReader(stream);
