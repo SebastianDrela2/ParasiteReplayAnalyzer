@@ -17,11 +17,11 @@ namespace ParasiteReplayAnalyzer.Engine.FileHelpers
             var parts = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             var result = "";
 
-            foreach (string part in parts)
+            for (var i = 0; i < parts.Length - 1; i++)
             {
-                if (!string.IsNullOrEmpty(part))
+                if (!string.IsNullOrEmpty(parts[0]))
                 {
-                    result += part[0];
+                    result += parts[0];
                 }
             }
 
