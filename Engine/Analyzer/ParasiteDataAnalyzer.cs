@@ -13,7 +13,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
     {
         private string _parasiteReplayPath;
 
-        private static readonly string? _assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private static readonly string _assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         private static ReplayDecoder _decoder = new ReplayDecoder(_assemblyPath);
 
         public ParasiteData ParasiteData { get; set; }
@@ -35,14 +35,7 @@ namespace ParasiteReplayAnalyzer.Engine.Analyzer
 
         private async Task<Sc2Replay?> GetSc2ReplayAsync()
         {
-            if (_assemblyPath != null)
-            {
-                var replay = await _decoder.DecodeAsync(_parasiteReplayPath);
-
-                return replay;
-            }
-
-            return null;
+            return await _decoder.DecodeAsync(_parasiteReplayPath);
         }
 
         private ParasiteData GetParasiteData(Sc2Replay replay)
