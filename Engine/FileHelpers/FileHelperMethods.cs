@@ -19,9 +19,11 @@ namespace ParasiteReplayAnalyzer.Engine.FileHelpers
 
             for (var i = 0; i < parts.Length - 1; i++)
             {
-                if (!string.IsNullOrEmpty(parts[0]))
+                var part = parts[i];
+
+                if (!string.IsNullOrEmpty(part))
                 {
-                    result += parts[0];
+                    result += part[0];
                 }
             }
 
