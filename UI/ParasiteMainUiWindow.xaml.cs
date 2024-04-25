@@ -117,10 +117,7 @@ namespace ParasiteReplayAnalyzer.UI
             }
 
             var folder = _replayFolderDatas.First(x => x.ReplayFolderCode == replayFolderCode);
-            folder.ReplaysData.Add(new ReplayData(fileName, path));
-
-            var index = _replayFolderDatas.IndexOf(folder);
-            _replayFolderDatas[index] = folder;
+            folder.ReplaysData.Add(new ReplayData(fileName, path));          
         }
 
         private ParasiteRecord? GetParasiteRecord(string replayName)
