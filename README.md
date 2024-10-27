@@ -1,4 +1,5 @@
 ## Replay analyzer for a popular arcade SC2 game.
+
 - Analyze one or multiple replays, afterwards take out averages, main stats as well as best players!
 
 ## Usage

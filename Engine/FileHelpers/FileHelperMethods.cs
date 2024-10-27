@@ -1,105 +1,85 @@
-﻿using ParasiteReplayAnalyzer.Engine.ReplayComponents;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ParasiteReplayAnalyzer.Engine.ReplayComponents;
 
-namespace ParasiteReplayAnalyzer.Engine.FileHelpers
+namespace ParasiteReplayAnalyzer.Engine.FileHelpers;
+
+public class FileHelperMethods
 {
-    public class FileHelperMethods
+    public static string ExtractFirstCharacters(string path)
     {
-        public static string ExtractFirstCharacters(string path)
+        if (string.IsNullOrEmpty(path)) return string.Empty;
+
+        var parts = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var result = "";
+
+        for (var i = 0; i < parts.Length - 1; i++)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                return string.Empty;
-            }
+            var part = parts[i];
 
-            var parts = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            var result = "";
-
-            for (var i = 0; i < parts.Length - 1; i++)
-            {
-                var part = parts[i];
-
-                if (!string.IsNullOrEmpty(part))
-                {
-                    result += part[0];
-                }
-            }
-
-            return result;
+            if (!string.IsNullOrEmpty(part)) result += part[0];
         }
 
-        public static string ExtractCodeFromSelectedItem(string selectedItem)
-        {
-            var result = string.Empty;
+        return result;
+    }
 
-            foreach (var c in selectedItem)
-            {
-                if (c != '/')
-                {
-                    result += c;
-                }
-                else
-                {
-                    break;
-                }
-            }
+    public static string ExtractCodeFromSelectedItem(string selectedItem)
+    {
+        var result = string.Empty;
 
-            return result;
-        }
+        foreach (var c in selectedItem)
+            if (c != '/')
+                result += c;
+            else
+                break;
 
-        public static string ExtractReplayNameFromSelectedItem(string selectedItem)
-        {
-            var result = string.Empty;
+        return result;
+    }
 
-            var passedSlash = false;
+    public static string ExtractReplayNameFromSelectedItem(string selectedItem)
+    {
+        var result = string.Empty;
 
-            foreach (var c in selectedItem)
-            {
-                if (passedSlash)
-                {
-                    result += c;
-                }
-                else if (c == '/')
-                {
-                    passedSlash = true;
-                }              
-            }
+        var passedSlash = false;
 
-            return result;
-        }
+        foreach (var c in selectedItem)
+            if (passedSlash)
+                result += c;
+            else if (c == '/') passedSlash = true;
 
-        public static string GetReplayPath(string selectedItem, List<ReplayFolderData> replayFolderDatas)
-        {
-            var code = ExtractCodeFromSelectedItem(selectedItem);
-            var replayName = ExtractReplayNameFromSelectedItem(selectedItem);
+        return result;
+    }
 
-            var folder = replayFolderDatas.First(x => x.ReplayFolderCode.Equals(code));
-            var replayPath = folder.ReplaysData.First(x => x.ReplayName.Equals(replayName)).ReplayPath;
+    public static string GetReplayPath(string selectedItem, List<ReplayFolderData> replayFolderDatas)
+    {
+        var code = ExtractCodeFromSelectedItem(selectedItem);
+        var replayName = ExtractReplayNameFromSelectedItem(selectedItem);
 
-            return replayPath;
-        }
+        var folder = replayFolderDatas.First(x => x.ReplayFolderCode.Equals(code));
+        var replayPath = folder.ReplaysData.First(x => x.ReplayName.Equals(replayName)).ReplayPath;
 
-        public static string GetParentDirectoryNameWithFile(string path)
-        {
-            var replayCode = Directory.GetParent(path).Name;
+        return replayPath;
+    }
 
-            var file = Path.GetFileNameWithoutExtension(path);
+    public static string GetParentDirectoryNameWithFile(string path)
+    {
+        var replayCode = Directory.GetParent(path).Name;
 
-            var result = $@"{replayCode}\{file}";
+        var file = Path.GetFileNameWithoutExtension(path);
 
-            return result;
-        }
+        var result = $@"{replayCode}\{file}";
 
-        public static string GetReplayCodeFromPathWithFile(string path)
-        {
-            var replayCode = ExtractFirstCharacters(path);
-            var file = Path.GetFileNameWithoutExtension(path);
+        return result;
+    }
 
-            var result = $@"{replayCode}\{file}";
+    public static string GetReplayCodeFromPathWithFile(string path)
+    {
+        var replayCode = ExtractFirstCharacters(path);
+        var file = Path.GetFileNameWithoutExtension(path);
 
-            return result;
-        }
+        var result = $@"{replayCode}\{file}";
+
+        return result;
     }
 }

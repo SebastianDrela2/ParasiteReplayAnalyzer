@@ -5,46 +5,42 @@ using ParasiteReplayAnalyzer.Engine.Analyzer;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using ParasiteReplayAnalyzer.Engine.ReplayComponents;
 
-namespace ParasiteReplayAnalyzer.Engine.Top500
+namespace ParasiteReplayAnalyzer.Engine.Top500;
+
+public class MassAnalyzeLoader
 {
-    public class MassAnalyzeLoader
+    public string ReplaysPath;
+
+    public MassAnalyzeLoader()
     {
-        public string ReplaysPath;
+        ReplaysPath = ReplayFolderData.GetReplayResultsPath();
+    }
 
-        public MassAnalyzeLoader()
+    public List<ParasiteData> Load()
+    {
+        var parasiteDatas = new List<ParasiteData>();
+
+        if (Directory.Exists(ReplaysPath))
         {
-            ReplaysPath = ReplayFolderData.GetReplayResultsPath();
-        }
+            var analyzedReplays = Directory.GetFiles(ReplaysPath, "*.json", SearchOption.AllDirectories);
 
-        public List<ParasiteData> Load()
-        {
-            var parasiteDatas = new List<ParasiteData>();
-
-            if (Directory.Exists(ReplaysPath))
+            foreach (var analyzedReplay in analyzedReplays)
             {
-                var analyzedReplays = Directory.GetFiles(ReplaysPath, "*.json", SearchOption.AllDirectories);
+                var json = File.ReadAllText(analyzedReplay);
 
-                foreach (var analyzedReplay in analyzedReplays)
+                if (json.Length > 0)
                 {
-                    var json = File.ReadAllText(analyzedReplay);
+                    var parasiteData = JsonConvert.DeserializeObject<ParasiteData>(json);
 
-                    if (json.Length > 0)
-                    {
-                        var parasiteData = JsonConvert.DeserializeObject<ParasiteData>(json);
-
-                        if (parasiteData != null)
-                        {
-                            parasiteDatas.Add(parasiteData);
-                        }
-                    }
+                    if (parasiteData != null) parasiteDatas.Add(parasiteData);
                 }
-
-                parasiteDatas.RemoveDuplicates();
-
-                return parasiteDatas;
             }
 
-            return new List<ParasiteData>();
+            parasiteDatas.RemoveDuplicates();
+
+            return parasiteDatas;
         }
+
+        return new List<ParasiteData>();
     }
 }

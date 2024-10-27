@@ -16,434 +16,405 @@ using ParasiteReplayAnalyzer.Engine.Top500;
 using ParasiteReplayAnalyzer.Saving;
 using Path = System.IO.Path;
 
-namespace ParasiteReplayAnalyzer.UI
+namespace ParasiteReplayAnalyzer.UI;
+
+/// <summary>
+///     Interaction logic for MainWindow.xaml
+/// </summary>
+public partial class ParasiteMainUiWindow : Window
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class ParasiteMainUiWindow : Window
+    private readonly MassAnalyzeLoader _massAnalyzeLoader = new();
+    private List<ParasiteData> _parasiteDatas;
+    private readonly List<ReplayFolderData> _replayFolderDatas = new();
+    private readonly SettingsManager _settingsManager = new();
+
+    public ParasiteMainUiWindow()
     {
-        private MassAnalyzeLoader _massAnalyzeLoader = new();
-        private SettingsManager _settingsManager = new();
-        private List<ReplayFolderData> _replayFolderDatas = new();
-        private List<ParasiteData> _parasiteDatas;        
+        InitializeComponent();
+        LoadSettings();
+        LoadParasiteDatas();
+        SetUi();
+    }
 
-        public ParasiteMainUiWindow()
-        {           
-            InitializeComponent();
-            LoadSettings();
+    private void LoadSettings()
+    {
+        if (!File.Exists(_settingsManager.SettingsPath))
+            _settingsManager.SaveSettings(_settingsManager.Settings.Sc2ReplayDirectoryPath,
+                _settingsManager.Settings.MaxConcurrentAnalyzeTasks);
+
+        _settingsManager.LoadSettings();
+    }
+
+    public void LoadParasiteDatas()
+    {
+        _parasiteDatas = _massAnalyzeLoader.Load();
+    }
+
+    public void SetUi()
+    {
+        FillListBoxItems();
+        SetReplayCount();
+    }
+
+    private void FillListBoxItems()
+    {
+        _listBoxReplays.Items.Clear();
+        _replayFolderDatas.Clear();
+
+        if (!Directory.Exists(_settingsManager.Settings.Sc2ReplayDirectoryPath)) return;
+
+        var allFileNames = Directory.GetFiles(_settingsManager.Settings.Sc2ReplayDirectoryPath, "*.Sc2Replay",
+            SearchOption.AllDirectories);
+
+        var orderedParasiteRecords = GetOrderedParasiteRecords(allFileNames);
+
+        foreach (var record in orderedParasiteRecords)
+        {
+            var displayName = record.GetDisplayName();
+            _listBoxReplays.Items.Add(displayName);
+        }
+    }
+
+    private void SetReplayCount()
+    {
+        _textBoxDetectedReplays.Text = $"Detected Replays: {_listBoxReplays.Items.Count}";
+    }
+
+    private IOrderedEnumerable<ParasiteRecord> GetOrderedParasiteRecords(string[] allFileNames)
+    {
+        var parasiteRecords = new List<ParasiteRecord>();
+
+        foreach (var path in allFileNames)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(path);
+            var parasiteRecord = GetParasiteRecord(fileName);
+
+            if (parasiteRecord is null) continue;
+
+            var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
+            var replayDisplay = $"{replayFolderCode}/{fileName}";
+
+            SetReplayFolderData(fileName, path, replayFolderCode);
+            parasiteRecord.SetDisplayName(replayDisplay);
+            parasiteRecords.Add(parasiteRecord);
+        }
+
+        return parasiteRecords.OrderBy(x => x.ReplayNumber);
+    }
+
+    private void SetReplayFolderData(string fileName, string path, string replayFolderCode)
+    {
+        if (!_replayFolderDatas.Any(x => x.ReplayFolderCode.Equals(replayFolderCode)))
+            _replayFolderDatas.Add(new ReplayFolderData(replayFolderCode, new List<ReplayData>()));
+
+        var folder = _replayFolderDatas.First(x => x.ReplayFolderCode == replayFolderCode);
+        folder.ReplaysData.Add(new ReplayData(fileName, path));
+    }
+
+    private ParasiteRecord? GetParasiteRecord(string replayName)
+    {
+        if (!replayName.Contains("P A R A S I T E - TEST")) return null;
+
+        return new ParasiteRecord(replayName);
+    }
+
+    private async void OnAnalyzeClickedAsync(object sender, RoutedEventArgs e)
+    {
+        if (_listBoxReplays.SelectedItem != null)
+        {
+            var selectedItem = _listBoxReplays.SelectedItem.ToString();
+
+            if (selectedItem != null) await AnalyzeReplayAsync(selectedItem);
+
             LoadParasiteDatas();
-            SetUi();
         }
+    }
 
-        private void LoadSettings()
+    private async Task AnalyzeReplayAsync(string selectedItem)
+    {
+        var watch = new Stopwatch();
+        watch.Start();
+        var replayPath = FileHelperMethods.GetReplayPath(selectedItem, _replayFolderDatas);
+
+        var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
+
+        Application.Current.Dispatcher.Invoke(() => { _textBoxResult.Text = $"Analyzing {replayPath}..."; });
+
+        await parasiteAnalyzer.LoadParasiteDataAsync();
+
+        await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
+        watch.Stop();
+
+        Application.Current.Dispatcher.Invoke(() =>
         {
-            if (!File.Exists(_settingsManager.SettingsPath))
+            _textBoxResult.Text =
+                $"Analyzed: {parasiteAnalyzer.ParasiteData.GameMetaData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
+        });
+    }
+
+    private async void OnMassAnalyzeClickedAsync(object sender, RoutedEventArgs e)
+    {
+        _textBoxResult.Text = "Started mass replay analysis...\n";
+
+        if (!Directory.Exists(_settingsManager.ReplayResultsPath))
+            Directory.CreateDirectory(_settingsManager.ReplayResultsPath);
+
+        var files = Directory.GetFiles(_settingsManager.ReplayResultsPath, "*.json", SearchOption.AllDirectories)
+            .Select(FileHelperMethods.GetParentDirectoryNameWithFile).ToHashSet();
+
+        var allReplays = _replayFolderDatas.SelectMany(y => y.ReplaysData).Select(x => x.ReplayPath);
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        await AnalyzeReplaysAsync(allReplays, files, cancellationTokenSource);
+
+        LoadParasiteDatas();
+    }
+
+    private async Task AnalyzeReplaysAsync(IEnumerable<string> allReplays, HashSet<string> files,
+        CancellationTokenSource cancellationTokenSource)
+    {
+        var replayTasks = new List<Task>();
+        var maxConcurrentTasks = 10;
+        var semaphore = new SemaphoreSlim(maxConcurrentTasks);
+        var completedReplays = 0;
+        var watch = new Stopwatch();
+
+        try
+        {
+            foreach (var replay in allReplays)
             {
-                _settingsManager.SaveSettings(_settingsManager.Settings.Sc2ReplayDirectoryPath, _settingsManager.Settings.MaxConcurrentAnalyzeTasks);
+                var analyzedReplayCodePath = FileHelperMethods.GetReplayCodeFromPathWithFile(replay);
+
+                if (files.Contains(analyzedReplayCodePath)) continue;
+
+                replayTasks.Add(AnalyzeReplayAsync(replay, semaphore, cancellationTokenSource.Token)
+                    .ContinueWith(task =>
+                    {
+                        completedReplays++;
+                        watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays,
+                            cancellationTokenSource.Token);
+                    }, cancellationTokenSource.Token));
             }
 
-            _settingsManager.LoadSettings();
-        }
-
-        public void LoadParasiteDatas()
-        {
-            _parasiteDatas = _massAnalyzeLoader.Load();
-        }
-
-        public void SetUi()
-        {
-            FillListBoxItems();
-            SetReplayCount();
-        }
-
-        private void FillListBoxItems()
-        {
-            _listBoxReplays.Items.Clear();
-            _replayFolderDatas.Clear();
-
-            if (!Directory.Exists(_settingsManager.Settings.Sc2ReplayDirectoryPath))
-            {
-                return;
-            }
-
-            var allFileNames = Directory.GetFiles(_settingsManager.Settings.Sc2ReplayDirectoryPath, "*.Sc2Replay",
-                    SearchOption.AllDirectories);
-
-            var orderedParasiteRecords = GetOrderedParasiteRecords(allFileNames);
-             
-            foreach(var record in orderedParasiteRecords)
-            {
-                var displayName = record.GetDisplayName();
-                _listBoxReplays.Items.Add(displayName);
-            }
-        }
-
-        private void SetReplayCount()
-        {
-            _textBoxDetectedReplays.Text = $"Detected Replays: {_listBoxReplays.Items.Count}";
-        }
-
-        private IOrderedEnumerable<ParasiteRecord> GetOrderedParasiteRecords(string[] allFileNames)
-        {
-            var parasiteRecords = new List<ParasiteRecord>();
-
-            foreach (var path in allFileNames)
-            {
-                var fileName = Path.GetFileNameWithoutExtension(path);
-                var parasiteRecord = GetParasiteRecord(fileName);
-
-                if (parasiteRecord is null)
-                {
-                    continue;
-                }
-               
-                var replayFolderCode = FileHelperMethods.ExtractFirstCharacters(path);
-                var replayDisplay = $"{replayFolderCode}/{fileName}";
-
-                SetReplayFolderData(fileName, path, replayFolderCode);
-                parasiteRecord.SetDisplayName(replayDisplay);
-                parasiteRecords.Add(parasiteRecord);
-            }
-
-            return parasiteRecords.OrderBy(x => x.ReplayNumber);
-        }
-
-        private void SetReplayFolderData(string fileName, string path, string replayFolderCode)
-        {
-            if (!_replayFolderDatas.Any(x => x.ReplayFolderCode.Equals(replayFolderCode)))
-            {
-                _replayFolderDatas.Add(new ReplayFolderData(replayFolderCode, new List<ReplayData>()));
-            }
-
-            var folder = _replayFolderDatas.First(x => x.ReplayFolderCode == replayFolderCode);
-            folder.ReplaysData.Add(new ReplayData(fileName, path));          
-        }
-
-        private ParasiteRecord? GetParasiteRecord(string replayName)
-        {
-            if(!replayName.Contains("P A R A S I T E - TEST"))
-            {
-                return null;
-            }
-
-            return new ParasiteRecord(replayName);
-        }
-
-        private async void OnAnalyzeClickedAsync(object sender, RoutedEventArgs e)
-        {
-            if (_listBoxReplays.SelectedItem != null)
-            {
-                var selectedItem = _listBoxReplays.SelectedItem.ToString();
-
-                if (selectedItem != null)
-                {
-                    await AnalyzeReplayAsync(selectedItem);
-                }
-
-                LoadParasiteDatas();
-            }
-        }
-
-        private async Task AnalyzeReplayAsync(string selectedItem)
-        {
-            var watch = new Stopwatch();
-            watch.Start();           
-            var replayPath = FileHelperMethods.GetReplayPath(selectedItem, _replayFolderDatas);
-
-            var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
+            await Task.WhenAll(replayTasks);
+            watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays, cancellationTokenSource.Token);
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                _textBoxResult.Text = $"Analyzing {replayPath}...";
+                _textBoxResult.Text = $"Finished mass replay analysis... Analyzed {replayTasks.Count} Replays";
             });
+        }
+        catch (OperationCanceledException)
+        {
+            Application.Current.Dispatcher.Invoke(() => { _textBoxResult.Text = "Mass replay analysis canceled."; });
+        }
+    }
 
+    private async Task AnalyzeReplayAsync(string replay, SemaphoreSlim semaphore, CancellationToken cancellationToken)
+    {
+        await semaphore.WaitAsync(cancellationToken);
+        try
+        {
+            var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
             await parasiteAnalyzer.LoadParasiteDataAsync();
 
             await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
-            watch.Stop();
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _textBoxResult.Text = $"Analyzed: {parasiteAnalyzer.ParasiteData.GameMetaData.ReplayName} in {watch.ElapsedMilliseconds / 1000} seconds\n";
-            });
         }
-
-        private async void OnMassAnalyzeClickedAsync(object sender, RoutedEventArgs e)
+        finally
         {
-            _textBoxResult.Text = "Started mass replay analysis...\n";
+            semaphore.Release();
+        }
+    }
 
-            if (!Directory.Exists(_settingsManager.ReplayResultsPath))
+    private Stopwatch UpdateUiProgress(Stopwatch watch, int ammountOfTasks, int completedReplays,
+        CancellationToken cancellationToken)
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            if (cancellationToken.IsCancellationRequested) return;
+
+            if (watch.IsRunning) watch.Stop();
+
+            var leftReplaysToAnalyze = ammountOfTasks - completedReplays;
+            var estimatedTimeLeft = GetEstimatedTimeLeft(leftReplaysToAnalyze, watch.ElapsedMilliseconds);
+
+            if (estimatedTimeLeft is not { Hours: 0, Minutes: 0, Seconds: 0 })
+                _textBoxResult.Text = $"Analyzed {completedReplays}/{ammountOfTasks}\n" +
+                                      $"Estimated time left: {estimatedTimeLeft}";
+
+            watch = new Stopwatch();
+            watch.Start();
+        });
+
+        return watch;
+    }
+
+    private void UpdateTextBoxResult(Action<MassAnalyzeCalculator, StringBuilder> action)
+    {
+        _textBoxResult.Text = "";
+
+        var massAnalyzeCalculator = new MassAnalyzeCalculator(_parasiteDatas);
+        var stringBuilder = new StringBuilder();
+
+        action(massAnalyzeCalculator, stringBuilder);
+
+        _textBoxResult.Text = stringBuilder.ToString();
+    }
+
+    private void OnWinRateClicked(object sender, RoutedEventArgs e)
+    {
+        UpdateTextBoxResult((calculator, sb) =>
+        {
+            var humanWinRate = calculator.GetHumanWinrate();
+            var aliensWinRate = calculator.GetAlienWinrate();
+            var undecidedWinrate = calculator.GetUndecidedWinrate();
+
+            sb.Append(
+                $"Human winrate: {humanWinRate}% Games: {_parasiteDatas.Count(x => x.VictoryStatus.Equals("Human Win"))} \n" +
+                $"Alien winrate: {aliensWinRate}% Games: {_parasiteDatas.Count(x => x.VictoryStatus.Equals("Alien Win"))} \n" +
+                $"Undecided winrate: {undecidedWinrate}% Games: {_parasiteDatas.Count(x => x.VictoryStatus.Equals("Undecided"))} ");
+        });
+    }
+
+    private void OnBestHostsClicked(object sender, RoutedEventArgs e)
+    {
+        UpdateTextBoxResult((calculator, sb) =>
+        {
+            var bestHosts = calculator.GetBestHosts();
+            var ranking = 1;
+
+            foreach (var host in bestHosts)
             {
-                Directory.CreateDirectory(_settingsManager.ReplayResultsPath);
+                sb.Append(
+                    $"#{ranking} {host.PlayerName} Win: {(host.HostWins / host.HostGames * 100).RoundUpToSecondDigitAfterZero()}% Games: {host.HostGames}\n");
+                ranking++;
             }
+        });
+    }
 
-            var files = Directory.GetFiles(_settingsManager.ReplayResultsPath, "*.json", SearchOption.AllDirectories)
-                .Select(FileHelperMethods.GetParentDirectoryNameWithFile).ToHashSet();
-            
-            var allReplays = _replayFolderDatas.SelectMany(y => y.ReplaysData).Select(x => x.ReplayPath);                      
-            var cancellationTokenSource = new CancellationTokenSource();
-
-            await AnalyzeReplaysAsync(allReplays, files, cancellationTokenSource);
-
-            LoadParasiteDatas();
-        }
-
-        private async Task AnalyzeReplaysAsync(IEnumerable<string> allReplays, HashSet<string> files, CancellationTokenSource cancellationTokenSource)
+    private void OnBestHumansClicked(object sender, RoutedEventArgs e)
+    {
+        UpdateTextBoxResult((calculator, sb) =>
         {
-            var replayTasks = new List<Task>();
-            var maxConcurrentTasks = 10;
-            var semaphore = new SemaphoreSlim(maxConcurrentTasks);
-            var completedReplays = 0;
-            var watch = new Stopwatch();
+            var bestHumans = calculator.GetBestHumans();
+            var ranking = 1;
 
-            try
+            foreach (var human in bestHumans)
             {
-                foreach (var replay in allReplays)
-                {
-                    var analyzedReplayCodePath = FileHelperMethods.GetReplayCodeFromPathWithFile(replay);
-
-                    if (files.Contains(analyzedReplayCodePath))
-                    {
-                        continue;
-                    }
-
-                    replayTasks.Add(AnalyzeReplayAsync(replay, semaphore, cancellationTokenSource.Token)
-                        .ContinueWith(task =>
-                        {
-                            completedReplays++;
-                            watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays,
-                                    cancellationTokenSource.Token);
-                        }, cancellationTokenSource.Token));
-                }
-
-                await Task.WhenAll(replayTasks);
-                watch = UpdateUiProgress(watch, replayTasks.Count, completedReplays, cancellationTokenSource.Token);
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    _textBoxResult.Text = $"Finished mass replay analysis... Analyzed {replayTasks.Count} Replays";
-                });
+                sb.Append(
+                    $"#{ranking} {human.PlayerName} Win: {(human.HumanWins / human.HumanGames * 100).RoundUpToSecondDigitAfterZero()}% Games: {human.HumanGames}\n");
+                ranking++;
             }
-            catch (OperationCanceledException)
+        });
+    }
+
+    private void OnBestKillRatioClicked(object sender, RoutedEventArgs e)
+    {
+        UpdateTextBoxResult((calculator, sb) =>
+        {
+            var bestKillers = calculator.GetBestKillers();
+            var ranking = 1;
+
+            foreach (var human in bestKillers)
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    _textBoxResult.Text = "Mass replay analysis canceled.";
-                });
+                sb.Append(
+                    $"#{ranking} {human.PlayerName} K/D: {(human.AnotherPlayerKills / human.KillsByAnotherPlayer).RoundUpToSecondDigitAfterZero()} Games: {human.HumanGames}\n");
+                ranking++;
             }
-        }
+        });
+    }
 
-        private async Task AnalyzeReplayAsync(string replay, SemaphoreSlim semaphore, CancellationToken cancellationToken)
+    private void OnBestSelferRatioClicked(object sender, RoutedEventArgs e)
+    {
+        UpdateTextBoxResult((calculator, sb) =>
         {
-            await semaphore.WaitAsync(cancellationToken);
-            try
-            {
-                var parasiteAnalyzer = new ParasiteDataAnalyzer(replay);
-                await parasiteAnalyzer.LoadParasiteDataAsync();
+            var bestSelfers = calculator.GetBestSelfers();
+            var ranking = 1;
 
-                await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData);
+            foreach (var human in bestSelfers)
+            {
+                sb.Append(
+                    $"#{ranking} {human.PlayerName} Ratio: {(human.SpawnedAmmount / human.HumanGames).RoundUpToSecondDigitAfterZero()} Games: {human.HumanGames}\n");
+                ranking++;
             }
-            finally
-            {
-                semaphore.Release();
-            }
-        }
+        });
+    }
 
-        private Stopwatch UpdateUiProgress(Stopwatch watch, int ammountOfTasks, int completedReplays, CancellationToken cancellationToken)
+    private void OnBestAlienSurvivorsClicked(object sender, RoutedEventArgs e)
+    {
+        UpdateTextBoxResult((calculator, sb) =>
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                if (cancellationToken.IsCancellationRequested)
+            var bestAlienSurvivors = calculator.GetBestAlienSurvivors();
+            var ranking = 1;
+
+            foreach (var human in bestAlienSurvivors)
+                if (human.HostGames != 0)
                 {
-                    return;
-                }
-
-                if (watch.IsRunning)
-                {
-                    watch.Stop();
-                }
-
-                var leftReplaysToAnalyze = ammountOfTasks - completedReplays;
-                var estimatedTimeLeft = GetEstimatedTimeLeft(leftReplaysToAnalyze, watch.ElapsedMilliseconds);
-
-                if (estimatedTimeLeft is not { Hours: 0, Minutes: 0, Seconds: 0 })
-                {
-                    _textBoxResult.Text = $"Analyzed {completedReplays}/{ammountOfTasks}\n" +
-                                          $"Estimated time left: {estimatedTimeLeft}";
-                }
-
-                watch = new Stopwatch();
-                watch.Start();
-            });
-
-            return watch;
-        }
-
-        private void UpdateTextBoxResult(Action<MassAnalyzeCalculator, StringBuilder> action)
-        {
-            _textBoxResult.Text = "";
-
-            var massAnalyzeCalculator = new MassAnalyzeCalculator(_parasiteDatas);
-            var stringBuilder = new StringBuilder();
-
-            action(massAnalyzeCalculator, stringBuilder);
-
-            _textBoxResult.Text = stringBuilder.ToString();
-        }
-
-        private void OnWinRateClicked(object sender, RoutedEventArgs e)
-        {
-            UpdateTextBoxResult((calculator, sb) =>
-            {
-                var humanWinRate = calculator.GetHumanWinrate();
-                var aliensWinRate = calculator.GetAlienWinrate();
-                var undecidedWinrate = calculator.GetUndecidedWinrate();
-
-                sb.Append($"Human winrate: {humanWinRate}% Games: {_parasiteDatas.Count(x => x.VictoryStatus.Equals("Human Win"))} \n" +
-                          $"Alien winrate: {aliensWinRate}% Games: {_parasiteDatas.Count(x => x.VictoryStatus.Equals("Alien Win"))} \n" +
-                          $"Undecided winrate: {undecidedWinrate}% Games: {_parasiteDatas.Count(x => x.VictoryStatus.Equals("Undecided"))} ");
-            });
-        }
-
-        private void OnBestHostsClicked(object sender, RoutedEventArgs e)
-        {
-            UpdateTextBoxResult((calculator, sb) =>
-            {
-                var bestHosts = calculator.GetBestHosts();
-                var ranking = 1;
-
-                foreach (var host in bestHosts)
-                {
-                    sb.Append($"#{ranking} {host.PlayerName} Win: {(host.HostWins / host.HostGames * 100).RoundUpToSecondDigitAfterZero()}% Games: {host.HostGames}\n");
+                    sb.Append(
+                        $"#{ranking} ({human.Handles}) {human.PlayerName} Rate: {human.SurvivedTimeAlienPercentages / human.HostGames}% Games: {human.HostGames}\n");
                     ranking++;
                 }
-            });
-        }
+        });
+    }
 
-        private void OnBestHumansClicked(object sender, RoutedEventArgs e)
+    private void OnBestHumanSurvivorsClicked(object sender, RoutedEventArgs e)
+    {
+        UpdateTextBoxResult((calculator, sb) =>
         {
-            UpdateTextBoxResult((calculator, sb) =>
-            {
-                var bestHumans = calculator.GetBestHumans();
-                var ranking = 1;
+            var bestHumanSurvivors = calculator.GetBestHumanSurvivors();
+            var ranking = 1;
 
-                foreach (var human in bestHumans)
+            foreach (var human in bestHumanSurvivors)
+                if (human.HumanGames != 0)
                 {
-                    sb.Append($"#{ranking} {human.PlayerName} Win: {(human.HumanWins / human.HumanGames * 100).RoundUpToSecondDigitAfterZero()}% Games: {human.HumanGames}\n");
+                    sb.Append(
+                        $"#{ranking} ({human.Handles}) {human.PlayerName} Rate: {human.SurviveTimeHumanPercentages / human.HumanGames}% Games: {human.HumanGames}\n");
                     ranking++;
                 }
-            });
-        }
+        });
+    }
 
-        private void OnBestKillRatioClicked(object sender, RoutedEventArgs e)
+    private void OnBestAlienFormsClicked(object sender, RoutedEventArgs e)
+    {
+        UpdateTextBoxResult((calulator, sb) =>
         {
-            UpdateTextBoxResult((calculator, sb) =>
+            var bestForms = calulator.GetBestAlienForms();
+            var ranking = 1;
+
+            foreach (var form in bestForms)
             {
-                var bestKillers = calculator.GetBestKillers();
-                var ranking = 1;
-
-                foreach (var human in bestKillers)
-                {
-                    sb.Append($"#{ranking} {human.PlayerName} K/D: {(human.AnotherPlayerKills / human.KillsByAnotherPlayer).RoundUpToSecondDigitAfterZero()} Games: {human.HumanGames}\n");
-                    ranking++;
-                }
-            });
-        }
-
-        private void OnBestSelferRatioClicked(object sender, RoutedEventArgs e)
-        {
-            UpdateTextBoxResult((calculator, sb) =>
-            {
-                var bestSelfers = calculator.GetBestSelfers();
-                var ranking = 1;
-
-                foreach (var human in bestSelfers)
-                {
-                    sb.Append($"#{ranking} {human.PlayerName} Ratio: {(human.SpawnedAmmount / human.HumanGames).RoundUpToSecondDigitAfterZero()} Games: {human.HumanGames}\n");
-                    ranking++;
-                }
-            });
-        }
-
-        private void OnBestAlienSurvivorsClicked(object sender, RoutedEventArgs e)
-        {
-            UpdateTextBoxResult((calculator, sb) =>
-            {
-                var bestAlienSurvivors = calculator.GetBestAlienSurvivors();
-                var ranking = 1;
-
-                foreach (var human in bestAlienSurvivors)
-                {
-                    if (human.HostGames != 0)
-                    {
-                        sb.Append($"#{ranking} ({human.Handles}) {human.PlayerName} Rate: {human.SurvivedTimeAlienPercentages / human.HostGames}% Games: {human.HostGames}\n");
-                        ranking++;
-                    }
-                }
-            });
-        }
-
-        private void OnBestHumanSurvivorsClicked(object sender, RoutedEventArgs e)
-        {
-            UpdateTextBoxResult((calculator, sb) =>
-            {
-                var bestHumanSurvivors = calculator.GetBestHumanSurvivors();
-                var ranking = 1;
-                
-                foreach (var human in bestHumanSurvivors)
-                {
-                    if (human.HumanGames != 0)
-                    {
-                        sb.Append($"#{ranking} ({human.Handles}) {human.PlayerName} Rate: {human.SurviveTimeHumanPercentages / human.HumanGames}% Games: {human.HumanGames}\n");
-                        ranking++;
-                    }
-                }
-            });
-        }
-
-        private void OnBestAlienFormsClicked(object sender, RoutedEventArgs e)
-        {
-            UpdateTextBoxResult((calulator, sb) =>
-            {
-                var bestForms = calulator.GetBestAlienForms();
-                var ranking = 1;
-
-                foreach (var form in bestForms)
-                {
-                    sb.Append($"#{ranking} {form.Name} WinRate: {form.WinPercentage.RoundUpToSecondDigitAfterZero()}% Games: {form.Games}\n");
-                    ranking++;
-                }
-            });
-        }
-
-        private void OnMenuItemOptionsClicked(object sender, RoutedEventArgs e)
-        {
-            _ = new SettingsUI(_settingsManager, this);
-        }
-
-        private async void OnMenuAnalyzeClicked(object sender, RoutedEventArgs e)
-        {
-            var openFileDialog = new OpenFileDialog();
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                var replayPath = openFileDialog.FileName;
-                var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
-
-                await parasiteAnalyzer.LoadParasiteDataAsync();
-                await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData!);
+                sb.Append(
+                    $"#{ranking} {form.Name} WinRate: {form.WinPercentage.RoundUpToSecondDigitAfterZero()}% Games: {form.Games}\n");
+                ranking++;
             }
+        });
+    }
 
-        }
+    private void OnMenuItemOptionsClicked(object sender, RoutedEventArgs e)
+    {
+        _ = new SettingsUI(_settingsManager, this);
+    }
 
-        private TimeSpan GetEstimatedTimeLeft(int leftReplays, long currentReplayAnalysisTimeInMilliseconds)
+    private async void OnMenuAnalyzeClicked(object sender, RoutedEventArgs e)
+    {
+        var openFileDialog = new OpenFileDialog();
+
+        if (openFileDialog.ShowDialog() == true)
         {
-            var totalExpectedTimeInSeconds = leftReplays * (currentReplayAnalysisTimeInMilliseconds/1000);
+            var replayPath = openFileDialog.FileName;
+            var parasiteAnalyzer = new ParasiteDataAnalyzer(replayPath);
 
-            var timeSpan = TimeSpan.FromSeconds(totalExpectedTimeInSeconds);
-
-            return timeSpan;
+            await parasiteAnalyzer.LoadParasiteDataAsync();
+            await _settingsManager.SaveParasiteDataAsync(parasiteAnalyzer.ParasiteData!);
         }
+    }
+
+    private TimeSpan GetEstimatedTimeLeft(int leftReplays, long currentReplayAnalysisTimeInMilliseconds)
+    {
+        var totalExpectedTimeInSeconds = leftReplays * (currentReplayAnalysisTimeInMilliseconds / 1000);
+
+        var timeSpan = TimeSpan.FromSeconds(totalExpectedTimeInSeconds);
+
+        return timeSpan;
     }
 }

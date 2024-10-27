@@ -1,11 +1,10 @@
-﻿namespace ParasiteReplayAnalyzer.Engine.Analyzer
+﻿namespace ParasiteReplayAnalyzer.Engine.Analyzer;
+
+public enum VictoryCondition
 {
-    public enum VictoryCondition
-    {
-        Alien,
-        Psion,
-        Android,
-        Human,
-        Syndicate
-    }
+    Alien,
+    Psion,
+    Android,
+    Human,
+    Syndicate
 }

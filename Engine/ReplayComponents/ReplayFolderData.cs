@@ -3,47 +3,41 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace ParasiteReplayAnalyzer.Engine.ReplayComponents
+namespace ParasiteReplayAnalyzer.Engine.ReplayComponents;
+
+public class ReplayFolderData
 {
-    public class ReplayFolderData
+    public string ReplayFolderCode;
+
+    public List<ReplayData> ReplaysData;
+
+    public ReplayFolderData(string replayFolderCode, List<ReplayData> replaysData)
     {
-        public string ReplayFolderCode;
+        ReplayFolderCode = replayFolderCode;
+        ReplaysData = replaysData;
+    }
 
-        public List<ReplayData> ReplaysData;
-
-        public ReplayFolderData(string replayFolderCode, List<ReplayData> replaysData)
+    private static string GetCsprojDirectory(string currentDirectory)
+    {
+        while (currentDirectory != null)
         {
-            ReplayFolderCode = replayFolderCode;
-            ReplaysData = replaysData;
+            var solutionFiles = Directory.GetFiles(currentDirectory, "*.csproj");
+
+            if (solutionFiles.Any()) return currentDirectory;
+
+            currentDirectory = Directory.GetParent(currentDirectory)?.FullName;
         }
 
-        private static string GetCsprojDirectory(string currentDirectory)
-        {
-            while (currentDirectory != null)
-            {
-                var solutionFiles = Directory.GetFiles(currentDirectory, "*.csproj");
+        return null;
+    }
 
-                if (solutionFiles.Any())
-                {
-                    return currentDirectory;
-                }
+    public static string GetReplayResultsPath()
+    {
+        var debugPath = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
 
-                currentDirectory = Directory.GetParent(currentDirectory)?.FullName;
-            }
+        var csProj = GetCsprojDirectory(debugPath);
+        var result = Path.Combine(csProj, "ReplayResults");
 
-            return null;
-        }
-
-        public static string GetReplayResultsPath()
-        {
-            var debugPath = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
-
-            var csProj = GetCsprojDirectory(debugPath);
-            var result = Path.Combine(csProj, "ReplayResults");
-
-            return result;
-        }
-
-       
+        return result;
     }
 }

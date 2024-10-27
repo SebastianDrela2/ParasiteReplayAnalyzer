@@ -1,36 +1,35 @@
 ﻿using System.Windows;
 using ParasiteReplayAnalyzer.Saving;
 
-namespace ParasiteReplayAnalyzer.UI
+namespace ParasiteReplayAnalyzer.UI;
+
+/// <summary>
+///     Interaction logic for SettingsUI.xaml
+/// </summary>
+public partial class SettingsUI : Window
 {
-    /// <summary>
-    /// Interaction logic for SettingsUI.xaml
-    /// </summary>
-    public partial class SettingsUI : Window
+    private readonly ParasiteMainUiWindow _mainUiWindow;
+    private readonly SettingsManager _settingsManager;
+
+    public SettingsUI(SettingsManager settingsManager, ParasiteMainUiWindow mainUiWindow)
     {
-        private SettingsManager _settingsManager;
-        private ParasiteMainUiWindow _mainUiWindow;
+        InitializeComponent();
+        Show();
 
-        public SettingsUI(SettingsManager settingsManager, ParasiteMainUiWindow mainUiWindow)
-        {
-            InitializeComponent();
-            Show();
+        _mainUiWindow = mainUiWindow;
+        _settingsManager = settingsManager;
+    }
 
-            _mainUiWindow = mainUiWindow;
-            _settingsManager = settingsManager;
-        }
+    private void OnOkClicked(object sender, RoutedEventArgs e)
+    {
+        var newReplaysPath = _pathTextBox.Text;
 
-        private void OnOkClicked(object sender, RoutedEventArgs e)
-        {
-            var newReplaysPath = _pathTextBox.Text;
+        _settingsManager.SaveSettings(newReplaysPath);
+        _settingsManager.LoadSettings();
 
-            _settingsManager.SaveSettings(newReplaysPath);
-            _settingsManager.LoadSettings();
+        _mainUiWindow.LoadParasiteDatas();
+        _mainUiWindow.SetUi();
 
-            _mainUiWindow.LoadParasiteDatas();
-            _mainUiWindow.SetUi();
-
-            Close();
-        }
+        Close();
     }
 }

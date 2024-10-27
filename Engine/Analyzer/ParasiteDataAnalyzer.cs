@@ -7,86 +7,83 @@ using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 using s2protocol.NET;
 using s2protocol.NET.Models;
 
-namespace ParasiteReplayAnalyzer.Engine.Analyzer
+namespace ParasiteReplayAnalyzer.Engine.Analyzer;
+
+public class ParasiteDataAnalyzer
 {
-    public class ParasiteDataAnalyzer
+    private static readonly string _assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+    private static readonly ReplayDecoder _decoder = new(_assemblyPath);
+    private readonly string _parasiteReplayPath;
+
+    public ParasiteDataAnalyzer(string parasiteReplayPath)
     {
-        private string _parasiteReplayPath;
+        _parasiteReplayPath = parasiteReplayPath;
+    }
 
-        private static readonly string _assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        private static readonly ReplayDecoder _decoder = new ReplayDecoder(_assemblyPath);
+    public ParasiteData ParasiteData { get; set; }
 
-        public ParasiteData ParasiteData { get; set; }
+    public async Task LoadParasiteDataAsync()
+    {
+        var sc2Replay = await GetSc2ReplayAsync();
 
-        public ParasiteDataAnalyzer(string parasiteReplayPath)
-        {
-            _parasiteReplayPath = parasiteReplayPath;
-        }
+        if (sc2Replay != null) ParasiteData = await Task.Run(() => GetParasiteData(sc2Replay));
+    }
 
-        public async Task LoadParasiteDataAsync()
-        {
-            var sc2Replay = await GetSc2ReplayAsync();
+    private async Task<Sc2Replay?> GetSc2ReplayAsync()
+    {
+        return await _decoder.DecodeAsync(_parasiteReplayPath);
+    }
 
-            if (sc2Replay != null)
-            {
-                ParasiteData = await Task.Run(() => GetParasiteData(sc2Replay));
-            }
-        }
+    private ParasiteData GetParasiteData(Sc2Replay replay)
+    {
+        var parasiteMethodHelper = new ParasiteMethodHelper();
+        var upgradeEvents = parasiteMethodHelper.FilterUpgradeEvents(replay.TrackerEvents.SUpgradeEvents);
+        var players = replay.Details!.Players.ToList();
+        players!.ModifySecondToLastAndLastPlayers();
 
-        private async Task<Sc2Replay?> GetSc2ReplayAsync()
-        {
-            return await _decoder.DecodeAsync(_parasiteReplayPath);
-        }
+        var gameMetaData = GetGameMetaData(replay, players, parasiteMethodHelper);
+        var gameData = GetGameData(replay, players, parasiteMethodHelper, upgradeEvents);
 
-        private ParasiteData GetParasiteData(Sc2Replay replay)
-        {
-            var parasiteMethodHelper = new ParasiteMethodHelper();
-            var upgradeEvents = parasiteMethodHelper.FilterUpgradeEvents(replay.TrackerEvents.SUpgradeEvents);
-            var players = replay.Details!.Players.ToList();
-            players!.ModifySecondToLastAndLastPlayers();
+        return new ParasiteData(gameMetaData, gameData, parasiteMethodHelper);
+    }
 
-            var gameMetaData = GetGameMetaData(replay, players, parasiteMethodHelper);
-            var gameData = GetGameData(replay, players, parasiteMethodHelper, upgradeEvents);
+    private GameData GetGameData(Sc2Replay replay, List<DetailsPlayer> players,
+        ParasiteMethodHelper parasiteMethodHelper, ICollection<SUpgradeEvent> upgradeEvents)
+    {
+        var specialRoleTeams = parasiteMethodHelper.GetSpecialRoleTeams(players, upgradeEvents);
+        var humanPlayerNames = parasiteMethodHelper.GetHumanPlayers(players, specialRoleTeams).Select(x => x.Name);
+        var playerKills = parasiteMethodHelper.GetPlayerKills(players, replay.TrackerEvents.SUnitBornEvents);
+        var dictOfLifePercentages =
+            parasiteMethodHelper.GetLifeTimePercentagesList(replay.TrackerEvents.SUnitBornEvents, players,
+                replay.Metadata);
+        var lastEvolution = parasiteMethodHelper.GetLastHostEvolution(replay.TrackerEvents.SUnitBornEvents);
+        var spawns = parasiteMethodHelper.GetSpawns(upgradeEvents, players);
+        var alivePlayers = parasiteMethodHelper.GetAlivePlayers(players, replay.TrackerEvents.SUnitBornEvents, spawns,
+            specialRoleTeams[0]);
 
-            return new ParasiteData(gameMetaData, gameData, parasiteMethodHelper);
-        }
+        return new GameData(humanPlayerNames, specialRoleTeams, playerKills, dictOfLifePercentages, lastEvolution,
+            alivePlayers, spawns);
+    }
 
-        private GameData GetGameData(Sc2Replay replay, List<DetailsPlayer> players, ParasiteMethodHelper parasiteMethodHelper, ICollection<SUpgradeEvent> upgradeEvents)
-        {
-            var specialRoleTeams = parasiteMethodHelper.GetSpecialRoleTeams(players, upgradeEvents);
-            var humanPlayerNames = parasiteMethodHelper.GetHumanPlayers(players, specialRoleTeams).Select(x => x.Name);
-            var playerKills = parasiteMethodHelper.GetPlayerKills(players, replay.TrackerEvents.SUnitBornEvents);
-            var dictOfLifePercentages = parasiteMethodHelper.GetLifeTimePercentagesList(replay.TrackerEvents.SUnitBornEvents, players, replay.Metadata);
-            var lastEvolution = parasiteMethodHelper.GetLastHostEvolution(replay.TrackerEvents.SUnitBornEvents);
-            var spawns = parasiteMethodHelper.GetSpawns(upgradeEvents, players);
-            var alivePlayers = parasiteMethodHelper.GetAlivePlayers(players, replay.TrackerEvents.SUnitBornEvents, spawns, specialRoleTeams[0]);
+    private GameMetaData GetGameMetaData(Sc2Replay replay, List<DetailsPlayer> players,
+        ParasiteMethodHelper parasiteMethodHelper)
+    {
+        var replayName = Path.GetFileNameWithoutExtension(replay.FileName);
+        var gameLength = replay.Metadata?.Duration ?? 0;
+        var playerHandles = parasiteMethodHelper.GetHandlesList(players);
+        var replayKey = GetReplayKey(players);
 
-            return new GameData(humanPlayerNames, specialRoleTeams, playerKills, dictOfLifePercentages, lastEvolution, alivePlayers, spawns);
-        }
+        return new GameMetaData(replayName, _parasiteReplayPath, replayKey, gameLength, players, playerHandles);
+    }
 
-        private GameMetaData GetGameMetaData(Sc2Replay replay, List<DetailsPlayer> players, ParasiteMethodHelper parasiteMethodHelper)
-        {
-            var replayName = Path.GetFileNameWithoutExtension(replay.FileName);
-            var gameLength = replay.Metadata?.Duration ?? 0;
-            var playerHandles = parasiteMethodHelper.GetHandlesList(players);
-            var replayKey = GetReplayKey(players);
+    private string GetReplayKey(IEnumerable<DetailsPlayer> detailsPlayers)
+    {
+        var key = string.Empty;
 
-            return new GameMetaData(replayName, _parasiteReplayPath, replayKey, gameLength, players, playerHandles);
-        }
+        foreach (var player in detailsPlayers)
+            if (player.Name is not "Alien" && player.Name is not "Station Security")
+                key += $"{player.Toon.Id}{player.Color.R}";
 
-        private string GetReplayKey(IEnumerable<DetailsPlayer> detailsPlayers)
-        {
-            var key = string.Empty;
-
-            foreach (var player in detailsPlayers)
-            {
-                if (player.Name is not "Alien" && player.Name is not "Station Security")
-                {
-                    key += $"{player.Toon.Id}{player.Color.R}";
-                }
-            }
-
-            return key;
-        }
+        return key;
     }
 }

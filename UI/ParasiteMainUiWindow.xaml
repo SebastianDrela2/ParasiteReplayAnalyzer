@@ -6,72 +6,76 @@
         mc:Ignorable="d"
         Title="Starcraft Parasite Analyzer" Height="850" Width="1200" Icon="\Images\parasite.png">
     <Window.Background>
-        <ImageBrush ImageSource="\Images\parasite.png" Stretch="Fill"/>
+        <ImageBrush ImageSource="\Images\parasite.png" Stretch="Fill" />
     </Window.Background>
-    
+
     <StackPanel>
         <Grid>
             <Menu>
                 <MenuItem Header="File" Width="30">
-                    <MenuItem Header="Analyze" Click="OnMenuAnalyzeClicked"/>
+                    <MenuItem Header="Analyze" Click="OnMenuAnalyzeClicked" />
                 </MenuItem>
                 <MenuItem Header="Actions" Width="50">
-                    <MenuItem x:Name ="_winRate" Header ="Human And Alien WinRate" Click="OnWinRateClicked"/>
-                    <MenuItem x:Name="_bestHosts" Header="Best Hosts" Click="OnBestHostsClicked"/>
-                    <MenuItem x:Name="_bestHumans" Header="Best Humans" Click="OnBestHumansClicked"/>
-                    <MenuItem x:Name="_bestKillers" Header="Best K/D" Click="OnBestKillRatioClicked"/>
-                    <MenuItem x:Name="_bestSelfers" Header="Best Selfers" Click="OnBestSelferRatioClicked"/>
-                    <MenuItem x:Name="_bestAlienSurvivors" Header="Best Alien Survivors" Click="OnBestAlienSurvivorsClicked"/>
-                    <MenuItem x:Name="_bestHumanSurvivors" Header="Best Human Survivors" Click="OnBestHumanSurvivorsClicked"/>
-                    <MenuItem x:Name="_bestAlienForms" Header="Best Alien Forms" Click="OnBestAlienFormsClicked"/>
+                    <MenuItem x:Name="_winRate" Header="Human And Alien WinRate" Click="OnWinRateClicked" />
+                    <MenuItem x:Name="_bestHosts" Header="Best Hosts" Click="OnBestHostsClicked" />
+                    <MenuItem x:Name="_bestHumans" Header="Best Humans" Click="OnBestHumansClicked" />
+                    <MenuItem x:Name="_bestKillers" Header="Best K/D" Click="OnBestKillRatioClicked" />
+                    <MenuItem x:Name="_bestSelfers" Header="Best Selfers" Click="OnBestSelferRatioClicked" />
+                    <MenuItem x:Name="_bestAlienSurvivors" Header="Best Alien Survivors"
+                              Click="OnBestAlienSurvivorsClicked" />
+                    <MenuItem x:Name="_bestHumanSurvivors" Header="Best Human Survivors"
+                              Click="OnBestHumanSurvivorsClicked" />
+                    <MenuItem x:Name="_bestAlienForms" Header="Best Alien Forms" Click="OnBestAlienFormsClicked" />
                 </MenuItem>
 
-                <MenuItem Header="Options" Width="50" Click="OnMenuItemOptionsClicked"/>
+                <MenuItem Header="Options" Width="50" Click="OnMenuItemOptionsClicked" />
             </Menu>
         </Grid>
-     
+
         <Grid Margin="0 5 0 0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="5" />
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="40"/>
+                <RowDefinition Height="40" />
             </Grid.RowDefinitions>
 
-            <Button x:Name="_buttonAnalyze" Content="ANALYZE" Grid.Column="1" Grid.Row="0" Click="OnAnalyzeClickedAsync"/>
-            <Button x:Name="_buttonMassAnalyze" Content="MASS ANALYZE" Grid.Column="3" Grid.Row="0" Click="OnMassAnalyzeClickedAsync"/>
+            <Button x:Name="_buttonAnalyze" Content="ANALYZE" Grid.Column="1" Grid.Row="0"
+                    Click="OnAnalyzeClickedAsync" />
+            <Button x:Name="_buttonMassAnalyze" Content="MASS ANALYZE" Grid.Column="3" Grid.Row="0"
+                    Click="OnMassAnalyzeClickedAsync" />
         </Grid>
 
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="30"/>
+                <RowDefinition Height="30" />
             </Grid.RowDefinitions>
 
-            <TextBox x:Name="_textBoxDetectedReplays" 
+            <TextBox x:Name="_textBoxDetectedReplays"
                      Background="Transparent"
                      Foreground="Orange"
                      Text="Detected Replays"
                      FontFamily="Cambria"
                      FontSize="20"
                      FontWeight="Bold"
-                     BorderThickness="0"/>
+                     BorderThickness="0" />
         </Grid>
 
         <Grid MinHeight="395" Margin="0 10 0 0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -82,25 +86,24 @@
                          FontWeight="Bold"
                          Foreground="LimeGreen"
                          BorderThickness="0"
-                         FontSize="15"                                               
-                         >
+                         FontSize="15">
                     <ListBox.Background>
-                        <SolidColorBrush Color="Black" Opacity="0.3"/>
+                        <SolidColorBrush Color="Black" Opacity="0.3" />
                     </ListBox.Background>
-                    
+
                 </ListBox>
             </ScrollViewer>
 
-            <TextBox x:Name="_textBoxResult" 
-                     Grid.Column="1" 
-                     Grid.Row="0" 
+            <TextBox x:Name="_textBoxResult"
+                     Grid.Column="1"
+                     Grid.Row="0"
                      Height="800"
                      Foreground="Yellow"
                      FontFamily="Arial"
                      FontWeight="Bold"
                      FontSize="20">
                 <TextBox.Background>
-                    <SolidColorBrush Color="Black" Opacity="0.3"/>
+                    <SolidColorBrush Color="Black" Opacity="0.3" />
                 </TextBox.Background>
             </TextBox>
         </Grid>

@@ -3,116 +3,124 @@ using System.Linq;
 using ParasiteReplayAnalyzer.Engine.Analyzer;
 using ParasiteReplayAnalyzer.Engine.ExtenstionMethods;
 
-namespace ParasiteReplayAnalyzer.Engine.Top500
+namespace ParasiteReplayAnalyzer.Engine.Top500;
+
+public class MassAnalyzeCalculator
 {
-    public class MassAnalyzeCalculator
+    private readonly List<ParasiteData>? _parasiteDatas;
+    private readonly List<PlayerStats>? _playerStats;
+
+    public MassAnalyzeCalculator(List<ParasiteData> parasiteDatas)
     {
-        private readonly List<PlayerStats>? _playerStats;
-        private readonly List<ParasiteData>? _parasiteDatas;
+        _parasiteDatas = parasiteDatas;
+        _playerStats = PlayerStats.GetPlayerStats(parasiteDatas);
+    }
 
-        public MassAnalyzeCalculator(List<ParasiteData> parasiteDatas)
-        {         
-            _parasiteDatas = parasiteDatas;
-            _playerStats = PlayerStats.GetPlayerStats(parasiteDatas);
-        }
+    public double GetUndecidedWinrate()
+    {
+        double undecidedWins = _parasiteDatas.Count(x => x.VictoryStatus.Equals("Undecided"));
+        double totalGames = _parasiteDatas.Count;
 
-        public double GetUndecidedWinrate()
-        {
-            double undecidedWins = _parasiteDatas.Count(x => x.VictoryStatus.Equals("Undecided"));
-            double totalGames = _parasiteDatas.Count;
+        return (undecidedWins / totalGames * 100).RoundUpToSecondDigitAfterZero();
+    }
 
-            return (undecidedWins / totalGames * 100).RoundUpToSecondDigitAfterZero();
-        }
-        public double GetAlienWinrate()
-        {
-            double alienWins = _parasiteDatas.Count(x => x.VictoryStatus.Equals("Alien Win"));
-            double totalGames = _parasiteDatas.Count;
+    public double GetAlienWinrate()
+    {
+        double alienWins = _parasiteDatas.Count(x => x.VictoryStatus.Equals("Alien Win"));
+        double totalGames = _parasiteDatas.Count;
 
-            return (alienWins / totalGames * 100).RoundUpToSecondDigitAfterZero();
-        }
+        return (alienWins / totalGames * 100).RoundUpToSecondDigitAfterZero();
+    }
 
-        public double GetHumanWinrate()
-        {
-            double humanWins = _parasiteDatas.Count(x => x.VictoryStatus.Equals("Human Win"));
-            double totalGames = _parasiteDatas.Count;
+    public double GetHumanWinrate()
+    {
+        double humanWins = _parasiteDatas.Count(x => x.VictoryStatus.Equals("Human Win"));
+        double totalGames = _parasiteDatas.Count;
 
-            return (humanWins / totalGames * 100).RoundUpToSecondDigitAfterZero();
-        }
+        return (humanWins / totalGames * 100).RoundUpToSecondDigitAfterZero();
+    }
 
-        public List<PlayerStats> GetBestHosts()
-        {
-            var bestHosts = _playerStats.Where(x => x.HostGames > 15)
-                .OrderByDescending(x => x.HostGames == 0 || x.HostWins == 0 ? 0.0 : (x.HostWins / x.HostGames).RoundUpToSecondDigitAfterZero()).ToList();
+    public List<PlayerStats> GetBestHosts()
+    {
+        var bestHosts = _playerStats.Where(x => x.HostGames > 15)
+            .OrderByDescending(x =>
+                x.HostGames == 0 || x.HostWins == 0 ? 0.0 : (x.HostWins / x.HostGames).RoundUpToSecondDigitAfterZero())
+            .ToList();
 
-            return bestHosts;
-        }
+        return bestHosts;
+    }
 
-        public List<PlayerStats> GetBestHumans()
-        {
-            var bestHumans = _playerStats.Where(x => x.HumanGames > 25)
-                .OrderByDescending(x => x.HumanWins == 0 || x.HumanGames == 0 ? 0.0 : (x.HumanWins / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
+    public List<PlayerStats> GetBestHumans()
+    {
+        var bestHumans = _playerStats.Where(x => x.HumanGames > 25)
+            .OrderByDescending(x =>
+                x.HumanWins == 0 || x.HumanGames == 0
+                    ? 0.0
+                    : (x.HumanWins / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
 
-            return bestHumans;
-        }
+        return bestHumans;
+    }
 
-        public List<PlayerStats> GetBestKillers()
-        {
-            var bestKillers = _playerStats.Where(x => x.HumanGames > 15)
-                .OrderByDescending(x => x.AnotherPlayerKills == 0 || x.KillsByAnotherPlayer == 0 ? 0.0 : (x.AnotherPlayerKills / x.KillsByAnotherPlayer)).ToList();
+    public List<PlayerStats> GetBestKillers()
+    {
+        var bestKillers = _playerStats.Where(x => x.HumanGames > 15)
+            .OrderByDescending(x =>
+                x.AnotherPlayerKills == 0 || x.KillsByAnotherPlayer == 0
+                    ? 0.0
+                    : x.AnotherPlayerKills / x.KillsByAnotherPlayer).ToList();
 
-            return bestKillers;
-        }
+        return bestKillers;
+    }
 
-        public List<PlayerStats> GetBestSelfers()
-        {
+    public List<PlayerStats> GetBestSelfers()
+    {
+        var bestSelfers = _playerStats.Where(x => x.HumanGames > 20)
+            .OrderByDescending(x =>
+                x.SpawnedAmmount == 0 || x.HumanGames == 0
+                    ? 0.0
+                    : (x.SpawnedAmmount / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
 
-            var bestSelfers = _playerStats.Where(x => x.HumanGames > 20)
-                .OrderByDescending(x =>
-                    x.SpawnedAmmount == 0 || x.HumanGames == 0 ? 0.0 : (x.SpawnedAmmount / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
+        return bestSelfers;
+    }
 
-            return bestSelfers;
-        }
+    public List<PlayerStats> GetBestAlienSurvivors()
+    {
+        var bestAlienSurvivors = _playerStats.Where(x => x.HostGames > 10)
+            .OrderByDescending(x =>
+                (x.SurvivedTimeAlienPercentages / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
 
-        public List<PlayerStats> GetBestAlienSurvivors()
-        {
-            var bestAlienSurvivors = _playerStats.Where(x => x.HostGames > 10)
-                .OrderByDescending(x =>
-                    (x.SurvivedTimeAlienPercentages / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
+        return bestAlienSurvivors;
+    }
 
-            return bestAlienSurvivors;
-        }
+    public List<PlayerStats> GetBestHumanSurvivors()
+    {
+        var bestHumanSurvivors = _playerStats.Where(x => x.HumanGames > 20)
+            .OrderByDescending(x =>
+                (x.SurviveTimeHumanPercentages / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
 
-        public List<PlayerStats> GetBestHumanSurvivors()
-        {
-            var bestHumanSurvivors = _playerStats.Where(x => x.HumanGames > 20)
-                .OrderByDescending(x =>
-                    (x.SurviveTimeHumanPercentages / x.HumanGames).RoundUpToSecondDigitAfterZero()).ToList();
+        return bestHumanSurvivors;
+    }
 
-            return bestHumanSurvivors;
-        }
+    public List<AlienForm> GetBestAlienForms()
+    {
+        var orderedEvolutions = _parasiteDatas
+            .GroupBy(x => x.GameData.LastHostEvolution)
+            .Select(group =>
+            {
+                var totalGames = group.Count();
+                var alienWins = group.Count(x => x.VictoryStatus.Equals("Alien Win"));
+                var winPercentage = (double)alienWins / totalGames * 100;
 
-        public List<AlienForm> GetBestAlienForms()
-        {
-            var orderedEvolutions = _parasiteDatas
-                .GroupBy(x => x.GameData.LastHostEvolution)
-                .Select(group =>
+                return new AlienForm
                 {
-                    var totalGames = group.Count();
-                    var alienWins = group.Count(x => x.VictoryStatus.Equals("Alien Win"));
-                    var winPercentage = (double)alienWins / totalGames * 100;
+                    Name = group.Key,
+                    Games = alienWins,
+                    WinPercentage = winPercentage
+                };
+            })
+            .OrderByDescending(group => group.WinPercentage)
+            .ToList();
 
-                    return new AlienForm
-                    {
-                        Name = group.Key,
-                        Games = alienWins,
-                        WinPercentage = winPercentage
-                    };
-
-                })
-                .OrderByDescending(group => group.WinPercentage)
-                .ToList();
-
-            return orderedEvolutions;
-        }
+        return orderedEvolutions;
     }
 }

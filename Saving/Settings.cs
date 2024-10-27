@@ -1,23 +1,20 @@
 ﻿using Newtonsoft.Json;
 
-namespace ParasiteReplayAnalyzer.Saving
+namespace ParasiteReplayAnalyzer.Saving;
+
+public class Settings
 {
-    public class Settings
+    public Settings()
     {
-        [JsonProperty]
-        public string Sc2ReplayDirectoryPath { get; set; }
-
-        [JsonProperty]
-        public int MaxConcurrentAnalyzeTasks { get; set; } = 10;
-
-        public Settings()
-        {
-
-        }
-        public Settings(string sc2ReplayDirectoryPath, int maxConcurrentAnalyzeTasks)
-        {
-            Sc2ReplayDirectoryPath = sc2ReplayDirectoryPath;
-            MaxConcurrentAnalyzeTasks = maxConcurrentAnalyzeTasks;
-        }
     }
+
+    public Settings(string sc2ReplayDirectoryPath, int maxConcurrentAnalyzeTasks)
+    {
+        Sc2ReplayDirectoryPath = sc2ReplayDirectoryPath;
+        MaxConcurrentAnalyzeTasks = maxConcurrentAnalyzeTasks;
+    }
+
+    [JsonProperty] public string Sc2ReplayDirectoryPath { get; set; }
+
+    [JsonProperty] public int MaxConcurrentAnalyzeTasks { get; set; } = 10;
 }
